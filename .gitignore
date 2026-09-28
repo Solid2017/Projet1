@@ -1,0 +1,6 @@
+/config/config.php
+/storage/*.log
+.DS_Store
+Thumbs.db
+*.swp
+node_modules/

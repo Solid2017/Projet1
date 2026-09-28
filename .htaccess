@@ -1,0 +1,28 @@
+AddType image/svg+xml .svg
+
+RewriteEngine On
+RewriteBase /
+
+# Sert directement les fichiers et dossiers existants (assets, etc.)
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Toutes les autres requêtes passent par le front-controller
+RewriteRule ^(.*)$ index.php?route=$1 [QSA,L]
+
+# Sécurité de base
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+</IfModule>
+
+<FilesMatch "\.(sql|md)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+  </IfModule>
+</FilesMatch>
