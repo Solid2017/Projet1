@@ -79,4 +79,11 @@ class Router
         header('Location: ' . self::url($path));
         exit;
     }
+
+    /** Redirection vers une URL absolue externe (ex: page de paiement CinetPay). */
+    public static function redirectExternal(string $url): void
+    {
+        header('Location: ' . $url);
+        exit;
+    }
 }

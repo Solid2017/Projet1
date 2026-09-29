@@ -80,6 +80,16 @@ class Auth
         }
     }
 
+    /** Un administrateur a toujours accès ; les autres doivent avoir un abonnement actif. */
+    public static function hasMentorAccess(): bool
+    {
+        if (self::isAdmin()) {
+            return true;
+        }
+        $id = self::id();
+        return $id !== null && Subscription::isActive($id);
+    }
+
     // -------------------------------------------------------------
     // CSRF
     // -------------------------------------------------------------

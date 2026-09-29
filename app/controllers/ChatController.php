@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 class ChatController
 {
+    /** Quota anti-abus par abonné et par jour (les admins ne sont pas limités). */
+    private const DAILY_MESSAGE_QUOTA = 40;
+
     public function index(): void
     {
         Auth::requireLogin();
@@ -62,6 +65,10 @@ class ChatController
             Router::redirect('chat');
             return;
         }
+        if (!Auth::hasMentorAccess()) {
+            Router::redirect('subscribe');
+            return;
+        }
 
         $trackId = Request::input('track_id') ? (int) Request::input('track_id') : null;
         $title = 'Nouvelle conversation';
@@ -95,6 +102,23 @@ class ChatController
             return;
         }
 
+        if (!Auth::hasMentorAccess()) {
+            View::json([
+                'ok' => false,
+                'error' => "L'accès au mentor IA nécessite un abonnement actif (2000 FCFA/mois).",
+                'requires_subscription' => true,
+            ], 402);
+            return;
+        }
+
+        if (!Auth::isAdmin() && Conversation::userMessageCountToday($userId) >= self::DAILY_MESSAGE_QUOTA) {
+            View::json([
+                'ok' => false,
+                'error' => "Tu as atteint la limite de " . self::DAILY_MESSAGE_QUOTA . " messages pour aujourd'hui. Reviens demain !",
+            ], 429);
+            return;
+        }
+
         $message = trim((string) Request::input('message', ''));
         if ($message === '' || mb_strlen($message) > 4000) {
             View::json(['ok' => false, 'error' => 'Message vide ou trop long.'], 422);
@@ -109,8 +133,11 @@ class ChatController
         Conversation::addMessage((int) $id, 'user', $message);
 
         $history = array_map(fn ($m) => ['role' => $m['role'], 'content' => $m['content']], Conversation::messages((int) $id));
-        // On ne garde que les 20 derniers échanges pour limiter la taille du contexte.
-        $history = array_slice($history, -20);
+        // On ne garde que les 16 derniers échanges pour limiter la taille du contexte
+        // (et donc le coût par appel — le seuil de cache de Claude n'est de toute
+        // façon pas atteint par notre prompt système, la seule vraie économie ici
+        // est de garder cette fenêtre courte).
+        $history = array_slice($history, -16);
 
         $systemPrompt = MentorPromptBuilder::build($user, $track, $lesson);
         $result = AIService::reply($systemPrompt, $history);

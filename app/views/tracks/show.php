@@ -11,11 +11,15 @@
       <?php if ($enrolled): ?>
         <div class="progress"><span style="width: <?= (int) $progress ?>%"></span></div>
         <div class="progress-label"><?= (int) $progress ?>% complété</div>
+        <?php if (Auth::hasMentorAccess()): ?>
         <form method="post" action="<?= Router::url('chat/new') ?>" style="margin-top:12px;">
           <?= Auth::csrfField() ?>
           <input type="hidden" name="track_id" value="<?= (int) $track['id'] ?>">
           <button class="btn btn-accent btn-block" type="submit">Discuter avec le mentor de ce parcours</button>
         </form>
+        <?php else: ?>
+        <a class="btn btn-accent btn-block" style="margin-top:12px;" href="<?= Router::url('subscribe') ?>">Débloquer le mentor (2000 FCFA/mois)</a>
+        <?php endif; ?>
       <?php else: ?>
         <form method="post" action="<?= Router::url('tracks/' . $track['slug'] . '/enroll') ?>">
           <?= Auth::csrfField() ?>

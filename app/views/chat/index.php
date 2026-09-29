@@ -1,6 +1,7 @@
 <div class="chat-shell">
   <aside class="chat-sidebar">
     <h2>Conversations</h2>
+    <?php if (Auth::hasMentorAccess()): ?>
     <form method="post" action="<?= Router::url('chat/new') ?>" style="margin:14px 0;">
       <?= Auth::csrfField() ?>
       <?php if (!empty($tracks)): ?>
@@ -15,6 +16,12 @@
       <?php endif; ?>
       <button class="btn btn-accent btn-block btn-sm" type="submit">+ Nouvelle conversation</button>
     </form>
+    <?php else: ?>
+    <div class="card" style="margin:14px 0;padding:16px;">
+      <p style="color:var(--muted);font-size:.9rem;margin-bottom:10px;">Abonne-toi pour débloquer le mentor IA.</p>
+      <a class="btn btn-accent btn-block btn-sm" href="<?= Router::url('subscribe') ?>">2000 FCFA / mois</a>
+    </div>
+    <?php endif; ?>
 
     <div class="chat-list">
       <?php foreach ($conversations as $c): ?>

@@ -34,6 +34,11 @@ Router::get('chat/{id}', [ChatController::class, 'show']);
 Router::post('chat/new', [ChatController::class, 'createConversation']);
 Router::post('api/chat/{id}/send', [ChatController::class, 'send']);
 
+Router::get('subscribe', [SubscriptionController::class, 'pricing']);
+Router::post('subscribe/pay', [SubscriptionController::class, 'pay']);
+Router::get('subscribe/return', [SubscriptionController::class, 'returnFromProvider']);
+Router::post('payments/cinetpay/webhook', [SubscriptionController::class, 'webhook']);
+
 Router::get('admin', [AdminController::class, 'dashboard']);
 Router::get('admin/tracks', [AdminController::class, 'tracks']);
 Router::get('admin/tracks/new', [AdminController::class, 'trackNew']);
@@ -53,5 +58,6 @@ Router::post('admin/lessons/{id}', [AdminController::class, 'lessonUpdate']);
 Router::get('admin/users', [AdminController::class, 'users']);
 Router::post('admin/users/{id}/role', [AdminController::class, 'userRole']);
 Router::post('admin/users/{id}/toggle', [AdminController::class, 'userToggle']);
+Router::get('admin/subscriptions', [AdminController::class, 'subscriptions']);
 
 Router::dispatch();

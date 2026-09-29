@@ -35,11 +35,15 @@
       <div class="card">
         <h3 style="font-size:1rem;">Besoin d'aide ?</h3>
         <p style="color:var(--muted);font-size:.9rem;">Le mentor IA peut t'expliquer cette leçon autrement ou te proposer un exercice.</p>
+        <?php if (Auth::hasMentorAccess()): ?>
         <form method="post" action="<?= Router::url('chat/new') ?>">
           <?= Auth::csrfField() ?>
           <input type="hidden" name="track_id" value="<?= (int) $lesson['track_id'] ?>">
           <button class="btn btn-accent btn-block" type="submit">Demander au mentor</button>
         </form>
+        <?php else: ?>
+        <a class="btn btn-accent btn-block" href="<?= Router::url('subscribe') ?>">Débloquer le mentor (2000 FCFA/mois)</a>
+        <?php endif; ?>
       </div>
     </div>
   </div>

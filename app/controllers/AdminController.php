@@ -23,6 +23,18 @@ class AdminController
     }
 
     // -------------------------------------------------------------
+    // Abonnements / revenus
+    // -------------------------------------------------------------
+    public function subscriptions(): void
+    {
+        View::render('admin/subscriptions', [
+            'activeCount' => Subscription::activeCount(),
+            'revenueThisMonth' => Payment::revenueThisMonth(),
+            'payments' => Payment::recent(30),
+        ]);
+    }
+
+    // -------------------------------------------------------------
     // Parcours
     // -------------------------------------------------------------
     public function tracks(): void

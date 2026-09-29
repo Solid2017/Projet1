@@ -65,6 +65,8 @@
         submitBtn.disabled = false;
         if (res.ok) {
           appendMessage('assistant', res.reply_html);
+        } else if (res.requires_subscription) {
+          appendMessage('assistant', '<p>' + escapeHtml(res.error) + '</p><p><a class="btn btn-accent btn-sm" href="/subscribe">S\'abonner pour 2000 FCFA/mois</a></p>');
         } else {
           appendMessage('assistant', '<p>' + escapeHtml(res.reply || res.error || 'Erreur inconnue.') + '</p>');
         }
