@@ -50,7 +50,6 @@ class AIService
             'model' => $cfg['model'],
             'system' => $system,
             'max_tokens' => (int) ($cfg['max_tokens'] ?? 1024),
-            'temperature' => (float) ($cfg['temperature'] ?? 0.6),
             'messages' => array_map(fn ($m) => [
                 'role' => $m['role'] === 'assistant' ? 'assistant' : 'user',
                 'content' => $m['content'],
