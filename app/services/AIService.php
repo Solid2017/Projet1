@@ -27,7 +27,13 @@ class AIService
 
             return ['ok' => true, 'content' => $content];
         } catch (Throwable $e) {
-            error_log('[IgoTech IA] Erreur mentor IA (' . $provider . ') : ' . $e->getMessage());
+            $message = 'Erreur mentor IA (' . $provider . ') : ' . $e->getMessage();
+            error_log('[IgoTech IA] ' . $message);
+            @file_put_contents(
+                APP_ROOT . '/storage/app.log',
+                '[' . date('Y-m-d H:i:s') . '] ' . $message . "\n",
+                FILE_APPEND
+            );
             return [
                 'ok' => false,
                 'content' => "Le mentor IA est momentanément indisponible. Vérifie la configuration du " .
