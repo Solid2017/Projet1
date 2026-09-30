@@ -1,0 +1,22 @@
+# Dossier de fichiers envoyés par les utilisateurs (photos de profil) :
+# accessible en lecture, mais aucun script ne doit pouvoir s'y exécuter.
+
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+  php_flag engine off
+</IfModule>
+
+RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .pl .py .cgi .asp
+RemoveType .php .phtml .php3 .php4 .php5 .php7 .pl .py .cgi .asp
+
+<FilesMatch "\.(php|phtml|php\d|pl|py|cgi|asp)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+  </IfModule>
+</FilesMatch>

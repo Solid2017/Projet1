@@ -68,8 +68,14 @@ class User
     public static function all(): array
     {
         return Database::connection()
-            ->query('SELECT id, name, email, whatsapp_number, role, is_active, created_at FROM users ORDER BY created_at DESC')
+            ->query('SELECT id, name, email, whatsapp_number, role, is_active, avatar_path, avatar_color, created_at FROM users ORDER BY created_at DESC')
             ->fetchAll();
+    }
+
+    public static function setAvatarPath(int $id, string $path): void
+    {
+        $stmt = Database::connection()->prepare('UPDATE users SET avatar_path = ? WHERE id = ?');
+        $stmt->execute([$path, $id]);
     }
 
     public static function mentors(): array

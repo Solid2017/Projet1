@@ -9,10 +9,11 @@
         <a class="btn btn-outline btn-sm" href="<?= Router::url('admin/users/whatsapp.csv') ?>">Exporter les numéros WhatsApp (CSV)</a>
       </p>
       <table class="data-table">
-        <thead><tr><th>Nom</th><th>E-mail</th><th>WhatsApp</th><th>Rôle</th><th>Statut</th><th>Inscrit le</th><th></th></tr></thead>
+        <thead><tr><th></th><th>Nom</th><th>E-mail</th><th>WhatsApp</th><th>Rôle</th><th>Statut</th><th>Inscrit le</th><th></th></tr></thead>
         <tbody>
         <?php foreach ($users as $u): ?>
           <tr>
+            <td><?= View::avatar($u, 28) ?></td>
             <td><?= View::e($u['name']) ?></td>
             <td><?= View::e($u['email']) ?></td>
             <td><?= View::e($u['whatsapp_number'] ?? '—') ?></td>

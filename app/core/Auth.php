@@ -63,10 +63,20 @@ class Auth
         return self::check() ? (int) $_SESSION['user_id'] : null;
     }
 
+    /** Routes accessibles sans avoir encore ajouté de photo de profil (pour ne pas bloquer l'ajout lui-même). */
+    private const PHOTO_EXEMPT_ROUTES = ['account/photo', 'logout'];
+
     public static function requireLogin(): void
     {
         if (!self::check()) {
             Router::redirect('login');
+            return;
+        }
+
+        $user = self::user();
+        $route = trim((string) ($_GET['route'] ?? ''), '/');
+        if ($user && empty($user['avatar_path']) && !in_array($route, self::PHOTO_EXEMPT_ROUTES, true)) {
+            Router::redirect('account/photo');
         }
     }
 

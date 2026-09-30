@@ -23,6 +23,8 @@ Router::get('dashboard', [DashboardController::class, 'index']);
 
 Router::get('account/password', [AccountController::class, 'showPassword']);
 Router::post('account/password', [AccountController::class, 'updatePassword']);
+Router::get('account/photo', [AccountController::class, 'showPhoto']);
+Router::post('account/photo', [AccountController::class, 'uploadPhoto']);
 
 Router::get('tracks', [TrackController::class, 'index']);
 Router::get('tracks/{slug}', [TrackController::class, 'show']);

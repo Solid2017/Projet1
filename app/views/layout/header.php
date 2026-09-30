@@ -27,7 +27,7 @@
       <?php endif; ?>
     </div>
     <div class="nav-right">
-      <span class="avatar" style="background: <?= View::e($user['avatar_color']) ?>"><?= View::e(mb_strtoupper(mb_substr($user['name'], 0, 1))) ?></span>
+      <?= View::avatar($user, 32) ?>
       <span style="font-weight:600;font-size:.9rem;"><?= View::e($user['name']) ?></span>
       <a class="btn btn-ghost btn-sm" href="<?= Router::url('account/password') ?>">Mot de passe</a>
       <a class="btn btn-ghost btn-sm" href="<?= Router::url('logout') ?>">Déconnexion</a>

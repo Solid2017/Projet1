@@ -41,6 +41,19 @@ class View
         return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
     }
 
+    /** Avatar d'un utilisateur : photo de profil si présente, sinon initiale sur fond coloré. */
+    public static function avatar(array $user, int $size = 34): string
+    {
+        $style = "width:{$size}px;height:{$size}px;border-radius:50%;object-fit:cover;";
+        if (!empty($user['avatar_path'])) {
+            return '<img src="' . Router::url($user['avatar_path']) . '" alt="" style="' . $style . '">';
+        }
+        $initial = self::e(mb_strtoupper(mb_substr($user['name'] ?? '?', 0, 1)));
+        $color = self::e($user['avatar_color'] ?? '#1111EE');
+        $fontSize = max(12, (int) round($size * 0.42));
+        return '<span class="avatar" style="' . $style . "background:{$color};display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:{$fontSize}px;\">" . $initial . '</span>';
+    }
+
     public static function json($data, int $status = 200): void
     {
         http_response_code($status);

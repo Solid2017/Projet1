@@ -1,5 +1,7 @@
 /config/config.php
 /storage/*.log
+/uploads/avatars/*
+!/uploads/avatars/.gitkeep
 .DS_Store
 Thumbs.db
 *.swp

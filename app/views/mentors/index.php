@@ -15,7 +15,7 @@
       <?php foreach ($group['mentors'] as $mentor): ?>
       <div class="card">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
-          <span class="avatar" style="background: <?= View::e($mentor['avatar_color']) ?>;width:40px;height:40px;font-size:1rem;"><?= View::e(mb_strtoupper(mb_substr($mentor['name'], 0, 1))) ?></span>
+          <?= View::avatar($mentor, 40) ?>
           <div>
             <strong><?= View::e($mentor['name']) ?></strong>
           </div>
