@@ -31,6 +31,7 @@ class TrackController
         $modules = Track::modulesWithLessons((int) $track['id']);
         $statuses = $enrolled ? Progress::statusesForTrack($userId, (int) $track['id']) : [];
         $progress = $enrolled ? Track::progressPercent($userId, (int) $track['id']) : 0;
+        $certificate = ($enrolled && $progress >= 100) ? Certificate::issue($userId, (int) $track['id']) : null;
 
         View::render('tracks/show', [
             'track' => $track,
@@ -38,6 +39,7 @@ class TrackController
             'enrolled' => $enrolled,
             'statuses' => $statuses,
             'progress' => $progress,
+            'certificate' => $certificate,
         ]);
     }
 

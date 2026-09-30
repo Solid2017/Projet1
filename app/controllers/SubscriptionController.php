@@ -11,6 +11,7 @@ class SubscriptionController
         View::render('subscribe/index', [
             'subscription' => Subscription::current(Auth::id()),
             'amount' => APP_CONFIG['payment']['amount_fcfa'] ?? 2000,
+            'amountAnnual' => APP_CONFIG['payment']['amount_fcfa_annual'] ?? 20000,
             'error' => Request::input('error'),
         ]);
     }
@@ -30,7 +31,8 @@ class SubscriptionController
             return;
         }
 
-        $result = PaymentService::initiateSubscription(Auth::user(), $phone);
+        $plan = Request::input('plan') === 'annual' ? 'annual' : 'monthly';
+        $result = PaymentService::initiateSubscription(Auth::user(), $phone, $plan);
 
         if (!$result['ok']) {
             Router::redirect('subscribe?error=' . urlencode($result['error']));

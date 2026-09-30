@@ -24,13 +24,14 @@ class PaymentService
      *
      * @return array{ok:bool, payment_url?:string, transaction_id?:string, error?:string}
      */
-    public static function initiateSubscription(array $user, string $phone): array
+    public static function initiateSubscription(array $user, string $phone, string $plan = 'monthly'): array
     {
         $cfg = APP_CONFIG['payment'];
         $transactionId = 'igotech_' . time() . '_' . $user['id'] . '_' . bin2hex(random_bytes(3));
-        $amount = (int) ($cfg['amount_fcfa'] ?? 2000);
+        $isAnnual = $plan === 'annual';
+        $amount = (int) ($isAnnual ? ($cfg['amount_fcfa_annual'] ?? 20000) : ($cfg['amount_fcfa'] ?? 2000));
 
-        Payment::create($user['id'], $transactionId, $cfg['provider'] ?? 'cinetpay', $amount, $phone, 'MOBILE_MONEY');
+        Payment::create($user['id'], $transactionId, $cfg['provider'] ?? 'cinetpay', $amount, $phone, 'MOBILE_MONEY', $isAnnual ? 'annual' : 'monthly');
 
         $payload = [
             'apikey' => $cfg['api_key'],
@@ -38,7 +39,7 @@ class PaymentService
             'transaction_id' => $transactionId,
             'amount' => $amount,
             'currency' => $cfg['currency'] ?? 'XAF',
-            'description' => 'Abonnement mensuel Mentor IA — IgoTech IA',
+            'description' => $isAnnual ? 'Abonnement annuel Mentor IA — IgoTech IA' : 'Abonnement mensuel Mentor IA — IgoTech IA',
             'notify_url' => self::notifyUrl(),
             'return_url' => self::returnUrl($transactionId),
             'channels' => 'MOBILE_MONEY',
@@ -97,7 +98,13 @@ class PaymentService
 
             if ($status === 'ACCEPTED') {
                 Payment::markSuccess((int) $payment['id'], $response['data']['operator_id'] ?? null, json_encode($response));
-                Subscription::activate((int) $payment['user_id'], (int) $payment['amount_fcfa']);
+
+                $userId = (int) $payment['user_id'];
+                $months = ($payment['plan'] ?? 'monthly') === 'annual' ? 12 : 1;
+                Subscription::activate($userId, (int) $payment['amount_fcfa'], $months);
+
+                self::rewardReferralIfFirstPayment($userId);
+
                 return ['ok' => true, 'status' => 'success'];
             }
 
@@ -109,6 +116,18 @@ class PaymentService
             @file_put_contents(APP_ROOT . '/storage/app.log', '[' . date('Y-m-d H:i:s') . '] ' . $message . "\n", FILE_APPEND);
             return ['ok' => false, 'status' => 'error'];
         }
+    }
+
+    /** Récompense le parrain et le filleul (jours d'abonnement offerts) au tout premier paiement réussi du filleul. */
+    private static function rewardReferralIfFirstPayment(int $userId): void
+    {
+        $referral = Referral::findPendingForReferred($userId);
+        if (!$referral) {
+            return;
+        }
+        Subscription::extendByDays((int) $referral['referrer_id'], Referral::REWARD_DAYS);
+        Subscription::extendByDays($userId, Referral::REWARD_DAYS);
+        Referral::markRewarded((int) $referral['id']);
     }
 
     private static function notifyUrl(): string

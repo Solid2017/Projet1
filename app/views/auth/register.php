@@ -5,9 +5,11 @@
     <p class="subtitle">Rejoins IgoTech IA et démarre ton parcours accompagné par un mentor IA.</p>
 
     <?php if ($error): ?><div class="alert alert-error"><?= View::e($error) ?></div><?php endif; ?>
+    <?php if (!empty($refCode)): ?><div class="alert alert-success">Tu as été invité·e par un parrain — vous recevrez tous les deux <?= Referral::REWARD_DAYS ?> jours offerts dès ton premier abonnement.</div><?php endif; ?>
 
     <form method="post" action="<?= Router::url('register') ?>">
       <?= Auth::csrfField() ?>
+      <?php if (!empty($refCode)): ?><input type="hidden" name="ref_code" value="<?= View::e($refCode) ?>"><?php endif; ?>
       <div class="field">
         <label for="name">Nom complet</label>
         <input type="text" id="name" name="name" required autofocus value="<?= View::e($_POST['name'] ?? '') ?>">
@@ -15,6 +17,11 @@
       <div class="field">
         <label for="email">Adresse e-mail</label>
         <input type="email" id="email" name="email" required value="<?= View::e($_POST['email'] ?? '') ?>">
+      </div>
+      <div class="field">
+        <label for="whatsapp">Numéro WhatsApp</label>
+        <input type="tel" id="whatsapp" name="whatsapp" required placeholder="ex: 66 12 34 56" value="<?= View::e($_POST['whatsapp'] ?? '') ?>">
+        <div class="hint">Sert à t'ajouter au groupe WhatsApp des apprenants IgoTech IA.</div>
       </div>
       <div class="field">
         <label for="headline">Objectif (optionnel)</label>

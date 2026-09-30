@@ -61,6 +61,18 @@ class Conversation
         self::touch($conversationId);
     }
 
+    /** Nombre total de messages envoyés par cet utilisateur, tous temps confondus (pour l'essai gratuit). */
+    public static function userMessageCountTotal(int $userId): int
+    {
+        $stmt = Database::connection()->prepare(
+            "SELECT COUNT(*) FROM messages m
+             INNER JOIN conversations c ON c.id = m.conversation_id
+             WHERE c.user_id = ? AND m.role = 'user'"
+        );
+        $stmt->execute([$userId]);
+        return (int) $stmt->fetchColumn();
+    }
+
     /** Nombre de messages envoyés par cet utilisateur aujourd'hui (quota anti-abus). */
     public static function userMessageCountToday(int $userId): int
     {

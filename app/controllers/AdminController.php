@@ -229,11 +229,57 @@ class AdminController
         View::render('admin/users', ['users' => User::all()]);
     }
 
+    /** Export CSV des numéros WhatsApp, pour ajout manuel au groupe des apprenants. */
+    public function usersWhatsappCsv(): void
+    {
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="igotech-whatsapp.csv"');
+
+        $out = fopen('php://output', 'w');
+        fputcsv($out, ['Nom', 'E-mail', 'WhatsApp', 'Rôle'], ',', '"', '\\');
+        foreach (User::all() as $u) {
+            fputcsv($out, [$u['name'], $u['email'], $u['whatsapp_number'] ?? '', $u['role']], ',', '"', '\\');
+        }
+        fclose($out);
+    }
+
     public function userRole(string $id): void
     {
         if (Request::checkCsrf()) {
-            $role = Request::input('role') === 'admin' ? 'admin' : 'student';
-            User::setRole((int) $id, $role);
+            User::setRole((int) $id, (string) Request::input('role', 'student'));
+        }
+        Router::redirect('admin/users');
+    }
+
+    // -------------------------------------------------------------
+    // Mentors physiques (rôle "mentor") : bio, contact, domaines
+    // -------------------------------------------------------------
+    public function mentorEdit(string $id): void
+    {
+        $mentor = User::find((int) $id);
+        if (!$mentor || $mentor['role'] !== 'mentor') {
+            Router::redirect('admin/users');
+            return;
+        }
+
+        View::render('admin/mentor_edit', [
+            'mentor' => $mentor,
+            'tracks' => Track::all(),
+            'selectedTrackIds' => MentorDomain::trackIdsForMentor((int) $id),
+        ]);
+    }
+
+    public function mentorUpdate(string $id): void
+    {
+        $mentor = User::find((int) $id);
+        if ($mentor && $mentor['role'] === 'mentor' && Request::checkCsrf()) {
+            User::updateMentorProfile(
+                (int) $id,
+                (string) Request::input('mentor_bio', ''),
+                (string) Request::input('whatsapp_number', '')
+            );
+            $trackIds = array_map('intval', (array) Request::input('track_ids', []));
+            MentorDomain::setForMentor((int) $id, $trackIds);
         }
         Router::redirect('admin/users');
     }

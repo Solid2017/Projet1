@@ -44,6 +44,25 @@ class Subscription
         $stmt->execute([$userId, $months, $amountFcfa]);
     }
 
+    /** Prolonge l'abonnement d'un utilisateur de N jours (récompense de parrainage). S'il n'a pas d'abonnement actif, lui en crée un court plutôt que de perdre la récompense. */
+    public static function extendByDays(int $userId, int $days): void
+    {
+        $current = self::current($userId);
+        $pdo = Database::connection();
+
+        if ($current && $current['status'] === 'active' && strtotime($current['expires_at']) > time()) {
+            $stmt = $pdo->prepare('UPDATE subscriptions SET expires_at = DATE_ADD(expires_at, INTERVAL ? DAY) WHERE id = ?');
+            $stmt->execute([$days, $current['id']]);
+            return;
+        }
+
+        $stmt = $pdo->prepare(
+            "INSERT INTO subscriptions (user_id, status, started_at, expires_at, amount_fcfa)
+             VALUES (?, 'active', NOW(), DATE_ADD(NOW(), INTERVAL ? DAY), 0)"
+        );
+        $stmt->execute([$userId, $days]);
+    }
+
     public static function activeCount(): int
     {
         $stmt = Database::connection()->query(

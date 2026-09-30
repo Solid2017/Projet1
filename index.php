@@ -44,6 +44,10 @@ Router::post('subscribe/pay', [SubscriptionController::class, 'pay']);
 Router::get('subscribe/return', [SubscriptionController::class, 'returnFromProvider']);
 Router::post('payments/cinetpay/webhook', [SubscriptionController::class, 'webhook']);
 
+Router::get('parrainage', [ReferralController::class, 'index']);
+Router::get('certificate/{code}', [CertificateController::class, 'show']);
+Router::get('mentors', [MentorController::class, 'index']);
+
 Router::get('admin', [AdminController::class, 'dashboard']);
 Router::get('admin/tracks', [AdminController::class, 'tracks']);
 Router::get('admin/tracks/new', [AdminController::class, 'trackNew']);
@@ -61,8 +65,11 @@ Router::get('admin/lessons/{id}/edit', [AdminController::class, 'lessonEdit']);
 Router::post('admin/lessons/{id}/delete', [AdminController::class, 'lessonDelete']);
 Router::post('admin/lessons/{id}', [AdminController::class, 'lessonUpdate']);
 Router::get('admin/users', [AdminController::class, 'users']);
+Router::get('admin/users/whatsapp.csv', [AdminController::class, 'usersWhatsappCsv']);
 Router::post('admin/users/{id}/role', [AdminController::class, 'userRole']);
 Router::post('admin/users/{id}/toggle', [AdminController::class, 'userToggle']);
+Router::get('admin/users/{id}/mentor', [AdminController::class, 'mentorEdit']);
+Router::post('admin/users/{id}/mentor', [AdminController::class, 'mentorUpdate']);
 Router::get('admin/subscriptions', [AdminController::class, 'subscriptions']);
 
 Router::dispatch();

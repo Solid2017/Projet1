@@ -65,6 +65,13 @@
         submitBtn.disabled = false;
         if (res.ok) {
           appendMessage('assistant', res.reply_html);
+          if (res.trial_remaining !== null && res.trial_remaining !== undefined) {
+            if (res.trial_remaining > 0) {
+              appendMessage('assistant', '<p style="font-size:.8rem;color:var(--muted);">' + res.trial_remaining + ' message(s) d\'essai gratuit restant(s).</p>');
+            } else {
+              appendMessage('assistant', '<p>C\'était ton dernier message gratuit ! <a class="btn btn-accent btn-sm" href="/subscribe">S\'abonner pour 2000 FCFA/mois</a></p>');
+            }
+          }
         } else if (res.requires_subscription) {
           appendMessage('assistant', '<p>' + escapeHtml(res.error) + '</p><p><a class="btn btn-accent btn-sm" href="/subscribe">S\'abonner pour 2000 FCFA/mois</a></p>');
         } else {

@@ -53,6 +53,12 @@ class LessonController
         Progress::markCompleted($userId, (int) $lesson['id']);
         $progress = Track::progressPercent($userId, (int) $lesson['track_id']);
 
-        View::json(['ok' => true, 'progress' => $progress]);
+        $certificateCode = null;
+        if ($progress >= 100) {
+            $certificate = Certificate::issue($userId, (int) $lesson['track_id']);
+            $certificateCode = $certificate['code'];
+        }
+
+        View::json(['ok' => true, 'progress' => $progress, 'certificate_code' => $certificateCode]);
     }
 }

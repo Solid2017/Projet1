@@ -35,6 +35,7 @@ class ChatController
             'tracks' => Track::enrolledForUser(Auth::id()),
             'noFooter' => true,
             'extraScripts' => ['assets/js/chat.js'],
+            'trialRemaining' => Auth::freeTrialRemaining(),
         ]);
     }
 
@@ -55,6 +56,7 @@ class ChatController
             'tracks' => Track::enrolledForUser(Auth::id()),
             'noFooter' => true,
             'extraScripts' => ['assets/js/chat.js'],
+            'trialRemaining' => Auth::freeTrialRemaining(),
         ]);
     }
 
@@ -65,7 +67,7 @@ class ChatController
             Router::redirect('chat');
             return;
         }
-        if (!Auth::hasMentorAccess()) {
+        if (!Auth::canUseMentor()) {
             Router::redirect('subscribe');
             return;
         }
@@ -102,16 +104,16 @@ class ChatController
             return;
         }
 
-        if (!Auth::hasMentorAccess()) {
+        if (!Auth::canUseMentor()) {
             View::json([
                 'ok' => false,
-                'error' => "L'accès au mentor IA nécessite un abonnement actif (2000 FCFA/mois).",
+                'error' => "Ton essai gratuit est terminé. L'accès au mentor IA nécessite un abonnement actif (2000 FCFA/mois).",
                 'requires_subscription' => true,
             ], 402);
             return;
         }
 
-        if (!Auth::isAdmin() && Conversation::userMessageCountToday($userId) >= self::DAILY_MESSAGE_QUOTA) {
+        if (!Auth::isAdmin() && Auth::hasMentorAccess() && Conversation::userMessageCountToday($userId) >= self::DAILY_MESSAGE_QUOTA) {
             View::json([
                 'ok' => false,
                 'error' => "Tu as atteint la limite de " . self::DAILY_MESSAGE_QUOTA . " messages pour aujourd'hui. Reviens demain !",
@@ -148,6 +150,7 @@ class ChatController
             'ok' => $result['ok'],
             'reply' => $result['content'],
             'reply_html' => View::markdown($result['content']),
+            'trial_remaining' => Auth::hasMentorAccess() ? null : Auth::freeTrialRemaining(),
         ]);
     }
 }

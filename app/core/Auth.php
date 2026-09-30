@@ -80,6 +80,9 @@ class Auth
         }
     }
 
+    /** Nombre de messages gratuits offerts avant de demander un abonnement (essai, une fois dans la vie du compte). */
+    public const FREE_TRIAL_MESSAGES = 5;
+
     /** Un administrateur a toujours accès ; les autres doivent avoir un abonnement actif. */
     public static function hasMentorAccess(): bool
     {
@@ -88,6 +91,22 @@ class Auth
         }
         $id = self::id();
         return $id !== null && Subscription::isActive($id);
+    }
+
+    /** Messages d'essai gratuit restants (0 si l'essai est épuisé ou si l'utilisateur n'est pas connecté). */
+    public static function freeTrialRemaining(): int
+    {
+        $id = self::id();
+        if ($id === null) {
+            return 0;
+        }
+        return max(0, self::FREE_TRIAL_MESSAGES - Conversation::userMessageCountTotal($id));
+    }
+
+    /** Accès au mentor : abonnement actif OU essai gratuit non épuisé. */
+    public static function canUseMentor(): bool
+    {
+        return self::hasMentorAccess() || self::freeTrialRemaining() > 0;
     }
 
     // -------------------------------------------------------------

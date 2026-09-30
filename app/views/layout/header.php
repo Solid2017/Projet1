@@ -20,6 +20,8 @@
       <a href="<?= Router::url('dashboard') ?>">Tableau de bord</a>
       <a href="<?= Router::url('tracks') ?>">Parcours</a>
       <a href="<?= Router::url('chat') ?>">Mentor IA</a>
+      <a href="<?= Router::url('mentors') ?>">Trouver un mentor</a>
+      <a href="<?= Router::url('parrainage') ?>">Parrainage</a>
       <?php if ($user['role'] === 'admin'): ?>
       <a href="<?= Router::url('admin') ?>">Administration</a>
       <?php endif; ?>

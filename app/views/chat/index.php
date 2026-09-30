@@ -1,7 +1,10 @@
 <div class="chat-shell">
   <aside class="chat-sidebar">
     <h2>Conversations</h2>
-    <?php if (Auth::hasMentorAccess()): ?>
+    <?php if (!Auth::hasMentorAccess() && $trialRemaining > 0): ?>
+    <div class="alert alert-success" style="margin:14px 0;font-size:.85rem;"><?= (int) $trialRemaining ?> message(s) d'essai gratuit restant(s).</div>
+    <?php endif; ?>
+    <?php if (Auth::canUseMentor()): ?>
     <form method="post" action="<?= Router::url('chat/new') ?>" style="margin:14px 0;">
       <?= Auth::csrfField() ?>
       <?php if (!empty($tracks)): ?>
@@ -18,7 +21,7 @@
     </form>
     <?php else: ?>
     <div class="card" style="margin:14px 0;padding:16px;">
-      <p style="color:var(--muted);font-size:.9rem;margin-bottom:10px;">Abonne-toi pour débloquer le mentor IA.</p>
+      <p style="color:var(--muted);font-size:.9rem;margin-bottom:10px;">Ton essai gratuit est terminé. Abonne-toi pour continuer avec le mentor IA.</p>
       <a class="btn btn-accent btn-block btn-sm" href="<?= Router::url('subscribe') ?>">2000 FCFA / mois</a>
     </div>
     <?php endif; ?>

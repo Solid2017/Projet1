@@ -79,6 +79,19 @@ return [
         'base_url'    => 'https://api-checkout.cinetpay.com',
         'currency'    => 'XAF', // XAF = franc CFA (zone BEAC, dont le Tchad)
         'amount_fcfa' => 2000,
+        // Offre annuelle : 20 000 FCFA = 10 mois payés, 2 mois offerts.
+        'amount_fcfa_annual' => 20000,
+    ],
+
+    // -------------------------------------------------------------
+    // Réseaux sociaux / communauté — affichés dans le pied de page et
+    // utilisés pour l'e-mail automatique de bienvenue. Laisse une valeur
+    // vide ('') pour ne pas afficher le lien correspondant.
+    // -------------------------------------------------------------
+    'social' => [
+        'whatsapp_number' => '', // ex: '23566000000' (format international, sans le +)
+        'whatsapp_group_invite_link' => '', // lien d'invitation du groupe WhatsApp des apprenants
+        'facebook_url' => '',
     ],
 
     // -------------------------------------------------------------

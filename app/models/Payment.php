@@ -3,13 +3,13 @@ declare(strict_types=1);
 
 class Payment
 {
-    public static function create(int $userId, string $transactionId, string $provider, int $amountFcfa, string $phone, string $channel): int
+    public static function create(int $userId, string $transactionId, string $provider, int $amountFcfa, string $phone, string $channel, string $plan = 'monthly'): int
     {
         $stmt = Database::connection()->prepare(
-            'INSERT INTO payments (user_id, transaction_id, provider, channel, phone, amount_fcfa, status)
-             VALUES (?, ?, ?, ?, ?, ?, "pending")'
+            'INSERT INTO payments (user_id, transaction_id, provider, channel, phone, amount_fcfa, plan, status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, "pending")'
         );
-        $stmt->execute([$userId, $transactionId, $provider, $channel, $phone, $amountFcfa]);
+        $stmt->execute([$userId, $transactionId, $provider, $channel, $phone, $amountFcfa, $plan]);
         return (int) Database::connection()->lastInsertId();
     }
 

@@ -11,12 +11,18 @@
       <?php if ($enrolled): ?>
         <div class="progress"><span style="width: <?= (int) $progress ?>%"></span></div>
         <div class="progress-label"><?= (int) $progress ?>% complété</div>
-        <?php if (Auth::hasMentorAccess()): ?>
+        <?php if ($certificate): ?>
+        <a class="btn btn-primary btn-block" style="margin-top:12px;" href="<?= Router::url('certificate/' . $certificate['code']) ?>">🎓 Voir et partager mon certificat</a>
+        <?php endif; ?>
+        <?php if (Auth::canUseMentor()): ?>
         <form method="post" action="<?= Router::url('chat/new') ?>" style="margin-top:12px;">
           <?= Auth::csrfField() ?>
           <input type="hidden" name="track_id" value="<?= (int) $track['id'] ?>">
           <button class="btn btn-accent btn-block" type="submit">Discuter avec le mentor de ce parcours</button>
         </form>
+        <?php if (!Auth::hasMentorAccess()): ?>
+        <p style="text-align:center;font-size:.8rem;color:var(--muted);margin-top:6px;"><?= (int) Auth::freeTrialRemaining() ?> message(s) d'essai gratuit restant(s)</p>
+        <?php endif; ?>
         <?php else: ?>
         <a class="btn btn-accent btn-block" style="margin-top:12px;" href="<?= Router::url('subscribe') ?>">Débloquer le mentor (2000 FCFA/mois)</a>
         <?php endif; ?>
