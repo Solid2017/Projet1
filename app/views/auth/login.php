@@ -15,6 +15,7 @@
       <div class="field">
         <label for="password">Mot de passe</label>
         <input type="password" id="password" name="password" required>
+        <div class="hint" style="text-align:right;"><a href="<?= Router::url('forgot-password') ?>">Mot de passe oublié ?</a></div>
       </div>
       <button class="btn btn-primary btn-block" type="submit">Se connecter</button>
     </form>

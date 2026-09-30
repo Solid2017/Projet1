@@ -14,6 +14,11 @@ Router::get('register', [AuthController::class, 'showRegister']);
 Router::post('register', [AuthController::class, 'register']);
 Router::get('logout', [AuthController::class, 'logout']);
 
+Router::get('forgot-password', [PasswordResetController::class, 'showForgot']);
+Router::post('forgot-password', [PasswordResetController::class, 'sendReset']);
+Router::get('reset-password/{token}', [PasswordResetController::class, 'showReset']);
+Router::post('reset-password/{token}', [PasswordResetController::class, 'resetPassword']);
+
 Router::get('dashboard', [DashboardController::class, 'index']);
 
 Router::get('account/password', [AccountController::class, 'showPassword']);

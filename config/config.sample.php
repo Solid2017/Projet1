@@ -80,4 +80,24 @@ return [
         'currency'    => 'XAF', // XAF = franc CFA (zone BEAC, dont le Tchad)
         'amount_fcfa' => 2000,
     ],
+
+    // -------------------------------------------------------------
+    // Envoi d'e-mails (réinitialisation de mot de passe) via la boîte
+    // mail fournie par ton hébergement LWSPanel.
+    //
+    // Dans LWSPanel : Comptes e-mail → crée une adresse dédiée (ex:
+    // noreply@ton-domaine.tld) avec un mot de passe. Le "host" est
+    // généralement "mail.ton-domaine.tld" (vérifie dans la section
+    // "Configuration du client mail" de LWSPanel — le nom exact peut
+    // varier selon l'hébergeur).
+    // -------------------------------------------------------------
+    'mail' => [
+        'host'       => 'mail.votre-domaine.tld',
+        'port'       => 587,        // 587 (STARTTLS, recommandé) ou 465 (SSL direct)
+        'encryption' => 'tls',      // 'tls' ou 'ssl'
+        'username'   => 'noreply@votre-domaine.tld',
+        'password'   => 'CHANGE-MOI',
+        'from_email' => 'noreply@votre-domaine.tld',
+        'from_name'  => 'IgoTech IA',
+    ],
 ];

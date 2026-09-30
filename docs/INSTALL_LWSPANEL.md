@@ -24,7 +24,8 @@ dans l'ordre :
 1. `database/schema.sql` (structure des tables)
 2. `database/seed.sql` (compte administrateur + parcours de démonstration)
 3. `database/seed_more_tracks.sql` (parcours supplémentaires, optionnel)
-4. `database/migration_subscriptions.sql` (abonnement payant au mentor IA — voir section 6)
+4. `database/migration_subscriptions.sql` (abonnement payant au mentor IA — voir section 5)
+5. `database/migration_password_resets.sql` (mot de passe oublié)
 
 > Le compte admin de démonstration est `admin@igotech.ia` / `IgoTech2026!`.
 > **Change ce mot de passe immédiatement** après la première connexion,
@@ -107,6 +108,24 @@ chaque appel est limité aux 16 derniers messages ; et chaque abonné est
 limité à 40 messages/jour (modifiable dans
 `ChatController::DAILY_MESSAGE_QUOTA`) pour éviter qu'un usage abusif ne
 dépasse la marge dégagée par les 2000 FCFA/mois.
+
+## 6. Activer "Mot de passe oublié" (envoi d'e-mail)
+
+1. Dans LWSPanel : **Comptes e-mail**, crée une adresse dédiée (ex: `noreply@ton-domaine.tld`) avec un mot de passe.
+2. Note le serveur SMTP sortant (souvent `mail.ton-domaine.tld`, vérifiable dans la section "Configuration du client mail" de LWSPanel).
+3. Dans `config/config.php`, ajoute la section `mail` :
+   ```php
+   'mail' => [
+       'host'       => 'mail.ton-domaine.tld',
+       'port'       => 587,
+       'encryption' => 'tls',
+       'username'   => 'noreply@ton-domaine.tld',
+       'password'   => 'le-mot-de-passe-de-cette-boite',
+       'from_email' => 'noreply@ton-domaine.tld',
+       'from_name'  => 'IgoTech IA',
+   ],
+   ```
+4. Teste en cliquant sur **Mot de passe oublié ?** depuis la page de connexion. En cas d'échec, vérifie `storage/app.log` (les erreurs SMTP y sont journalisées) — les causes les plus fréquentes sont un mauvais `host`/`port`, ou l'adresse `from_email` qui ne correspond pas au compte `username`.
 
 ## 7. Vérifier l'installation
 
