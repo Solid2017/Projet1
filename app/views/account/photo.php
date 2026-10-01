@@ -1,7 +1,7 @@
 <div class="container">
   <div class="page-header">
-    <h1>Ajoute ta photo de profil</h1>
-    <p>Une photo est nécessaire pour continuer — elle permet à ton mentor et aux autres apprenants de te reconnaître.</p>
+    <h1>Ma photo de profil</h1>
+    <p>Optionnel — elle permet à ton mentor et aux autres apprenants de te reconnaître.</p>
   </div>
 
   <div class="card" style="max-width:480px;">
