@@ -386,6 +386,22 @@ table.data-table tr:last-child td { border-bottom: none; }
 footer.site-footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 40px 20px; }
 footer.site-footer a { color: var(--muted); text-decoration: underline; }
 
+.social-icons { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
+.social-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: #fff;
+  text-decoration: none;
+  transition: filter .15s ease;
+}
+.social-icon:hover { filter: brightness(1.1); }
+.social-icon-whatsapp { background: #25D366; }
+.social-icon-facebook { background: #1877F2; }
+
 .whatsapp-float {
   position: fixed;
   bottom: 20px;
