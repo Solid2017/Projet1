@@ -40,9 +40,9 @@
           </div>
           <a href="<?= Router::url('account/photo') ?>">Ma photo</a>
           <a href="<?= Router::url('account/password') ?>">Mot de passe</a>
+          <a class="account-menu-logout" href="<?= Router::url('logout') ?>">Déconnexion</a>
         </div>
       </details>
-      <a class="btn btn-ghost btn-sm" href="<?= Router::url('logout') ?>">Déconnexion</a>
     </div>
     <?php else: ?>
     <div class="nav-right" style="margin-left:auto;">
