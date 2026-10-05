@@ -27,10 +27,21 @@
       <?php endif; ?>
     </div>
     <div class="nav-right">
-      <?= View::avatar($user, 32) ?>
-      <span style="font-weight:600;font-size:.9rem;"><?= View::e($user['name']) ?></span>
-      <a class="btn btn-ghost btn-sm" href="<?= Router::url('account/photo') ?>">Ma photo</a>
-      <a class="btn btn-ghost btn-sm" href="<?= Router::url('account/password') ?>">Mot de passe</a>
+      <details class="account-menu">
+        <summary>
+          <?= View::avatar($user, 32) ?>
+          <span class="account-menu-label">Mon compte</span>
+          <span class="account-menu-caret" aria-hidden="true">▾</span>
+        </summary>
+        <div class="account-menu-panel">
+          <div class="account-menu-head">
+            <strong><?= View::e($user['name']) ?></strong>
+            <span><?= View::e($user['email']) ?></span>
+          </div>
+          <a href="<?= Router::url('account/photo') ?>">Ma photo</a>
+          <a href="<?= Router::url('account/password') ?>">Mot de passe</a>
+        </div>
+      </details>
       <a class="btn btn-ghost btn-sm" href="<?= Router::url('logout') ?>">Déconnexion</a>
     </div>
     <?php else: ?>

@@ -125,6 +125,49 @@ pre code { background: none; padding: 0; color: inherit; }
 }
 .nav-right { display: flex; align-items: center; gap: 10px; }
 
+.account-menu { position: relative; }
+.account-menu summary {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 12px 4px 4px;
+  border-radius: 999px;
+  background: var(--surface-alt);
+  cursor: pointer;
+  list-style: none;
+  font-weight: 700; font-size: .88rem; color: var(--ink);
+  user-select: none;
+}
+.account-menu summary::-webkit-details-marker { display: none; }
+.account-menu summary:hover, .account-menu[open] summary { background: var(--border); }
+.account-menu summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.account-menu-caret { font-size: .75rem; color: var(--muted); transition: transform .15s ease; }
+.account-menu[open] .account-menu-caret { transform: rotate(180deg); }
+.account-menu-panel {
+  position: absolute; right: 0; top: calc(100% + 8px);
+  min-width: 220px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: 6px;
+  display: flex; flex-direction: column;
+  z-index: 30;
+}
+.account-menu-head {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 10px 12px 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 6px;
+}
+.account-menu-head strong { font-size: .92rem; color: var(--ink); }
+.account-menu-head span { font-size: .8rem; color: var(--muted); overflow-wrap: anywhere; }
+.account-menu-panel a {
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--ink); font-weight: 600; font-size: .9rem;
+  text-decoration: none;
+}
+.account-menu-panel a:hover { background: var(--surface-alt); color: var(--blue); text-decoration: none; }
+
 .avatar {
   width: 36px; height: 36px;
   border-radius: 50%;
@@ -446,5 +489,6 @@ footer.site-footer a { color: var(--muted); text-decoration: underline; }
   .navbar .container { gap: 10px; padding: 0 14px; }
   .brand { font-size: .85rem; gap: 6px; }
   .brand img { width: 26px; height: 26px; }
-  .nav-right span[style*="font-weight:600"] { display: none; }
+  .account-menu-label { display: none; }
+  .account-menu-panel { position: fixed; top: 64px; left: 14px; right: 14px; min-width: 0; }
 }

@@ -22,6 +22,18 @@
     });
   };
 
+  document.querySelectorAll('.account-menu').forEach(function (menu) {
+    document.addEventListener('click', function (e) {
+      if (menu.open && !menu.contains(e.target)) menu.open = false;
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && menu.open) {
+        menu.open = false;
+        menu.querySelector('summary').focus();
+      }
+    });
+  });
+
   // -----------------------------------------------------------
   // Bouton "Marquer comme terminé" sur une leçon
   // -----------------------------------------------------------
