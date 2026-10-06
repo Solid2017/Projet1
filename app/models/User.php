@@ -109,4 +109,10 @@ class User
         $stmt = Database::connection()->prepare('UPDATE users SET password_hash = ? WHERE id = ?');
         $stmt->execute([$passwordHash, $id]);
     }
+
+    public static function setEmailOptOut(int $id, bool $optOut): void
+    {
+        $stmt = Database::connection()->prepare('UPDATE users SET email_opt_out = ? WHERE id = ?');
+        $stmt->execute([$optOut ? 1 : 0, $id]);
+    }
 }

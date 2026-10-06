@@ -76,7 +76,7 @@ class AuthController
             Referral::create((int) $referrer['id'], $id);
         }
 
-        $this->sendWelcomeEmail($name, $email);
+        $this->sendWelcomeEmail($id, $name, $email);
 
         $_SESSION['user_id'] = $id;
         session_regenerate_id(true);
@@ -85,17 +85,29 @@ class AuthController
     }
 
     /** E-mail automatique de bienvenue avec le lien d'invitation du groupe WhatsApp (si configuré). Meilleur effort : n'empêche jamais l'inscription. */
-    private function sendWelcomeEmail(string $name, string $email): void
+    private function sendWelcomeEmail(int $id, string $name, string $email): void
     {
         $groupLink = APP_CONFIG['social']['whatsapp_group_invite_link'] ?? '';
+        $first = htmlspecialchars(explode(' ', trim($name))[0] ?: $name, ENT_QUOTES, 'UTF-8');
 
-        $html = '<p>Bonjour ' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . ',</p>'
-            . '<p>Bienvenue sur IgoTech IA ! Ton compte est prêt, tu peux dès maintenant choisir un parcours et discuter avec ton mentor IA.</p>';
-
+        $after = [];
         if ($groupLink !== '') {
-            $html .= '<p>Rejoins aussi le groupe WhatsApp des apprenants IgoTech IA pour échanger avec les autres :</p>'
-                . '<p><a href="' . htmlspecialchars($groupLink, ENT_QUOTES, 'UTF-8') . '">Rejoindre le groupe WhatsApp</a></p>';
+            $after[] = 'Rejoins aussi le groupe WhatsApp des apprenants pour échanger avec les autres : '
+                . '<a href="' . htmlspecialchars($groupLink, ENT_QUOTES, 'UTF-8') . '" style="color:#1111EE;">rejoindre le groupe WhatsApp</a>.';
         }
+
+        $html = EmailTemplate::render([
+            'preheader' => 'Ton compte est prêt : choisis ton parcours et pose ta première question.',
+            'title' => "Bienvenue sur IgoTech IA, {$first} !",
+            'paragraphs' => [
+                'Ton compte est prêt. Choisis un parcours métier et pose ta première question à ton mentor IA : il te répond à toute heure, en français.',
+                'Tes ' . Auth::FREE_TRIAL_MESSAGES . ' premiers messages sont gratuits.',
+            ],
+            'cta_label' => 'Commencer maintenant',
+            'cta_url' => RetentionMailer::url('dashboard'),
+            'after' => $after,
+            'unsubscribe_url' => RetentionMailer::unsubscribeUrl($id),
+        ]);
 
         MailService::send($email, $name, 'Bienvenue sur IgoTech IA', $html);
     }

@@ -50,6 +50,10 @@ Router::get('parrainage', [ReferralController::class, 'index']);
 Router::get('certificate/{code}', [CertificateController::class, 'show']);
 Router::get('mentors', [MentorController::class, 'index']);
 
+Router::get('email/unsubscribe', [EmailController::class, 'showUnsubscribe']);
+Router::post('email/unsubscribe', [EmailController::class, 'unsubscribe']);
+Router::post('email/resubscribe', [EmailController::class, 'resubscribe']);
+
 Router::get('admin', [AdminController::class, 'dashboard']);
 Router::get('admin/tracks', [AdminController::class, 'tracks']);
 Router::get('admin/tracks/new', [AdminController::class, 'trackNew']);
@@ -73,5 +77,7 @@ Router::post('admin/users/{id}/toggle', [AdminController::class, 'userToggle']);
 Router::get('admin/users/{id}/mentor', [AdminController::class, 'mentorEdit']);
 Router::post('admin/users/{id}/mentor', [AdminController::class, 'mentorUpdate']);
 Router::get('admin/subscriptions', [AdminController::class, 'subscriptions']);
+Router::get('admin/emails', [AdminController::class, 'emails']);
+Router::get('admin/emails/preview/{key}', [AdminController::class, 'emailPreview']);
 
 Router::dispatch();

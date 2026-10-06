@@ -113,4 +113,21 @@ return [
         'from_email' => 'noreply@votre-domaine.tld',
         'from_name'  => 'IgoTech IA',
     ],
+
+    // -------------------------------------------------------------
+    // E-mails automatiques de fidélisation (cron/emails.php, toutes
+    // les heures). Voir docs/INSTALL_LWSPANEL.md, section 8.
+    // -------------------------------------------------------------
+    'retention' => [
+        'enabled'       => true,
+        'max_per_run'   => 100,  // e-mails max par passage (limite d'envoi de l'hébergeur)
+        'min_gap_hours' => 48,   // délai minimum entre deux e-mails pour une même personne
+        'weekly_digest' => true, // résumé de la semaine, le lundi à partir de 8h
+    ],
+
+    // Clé secrète pour lancer le cron par URL (cron/emails.php?key=…).
+    // Inutile si ta tâche planifiée lance la commande php directement.
+    'cron' => [
+        'key' => '',
+    ],
 ];

@@ -23,6 +23,46 @@ class AdminController
     }
 
     // -------------------------------------------------------------
+    // E-mails de fidélisation
+    // -------------------------------------------------------------
+    public function emails(): void
+    {
+        $pdo = Database::connection();
+        $counts = [];
+        foreach ($pdo->query(
+            "SELECT email_key, SUM(status = 'sent') AS sent, SUM(status = 'failed') AS failed
+             FROM email_log WHERE sent_at >= NOW() - INTERVAL 30 DAY GROUP BY email_key"
+        ) as $row) {
+            $counts[$row['email_key']] = $row;
+        }
+        $lastRunFile = APP_ROOT . '/storage/cron_emails_last_run.txt';
+
+        View::render('admin/emails', [
+            'rules' => RetentionMailer::RULES,
+            'counts' => $counts,
+            'recent' => $pdo->query(
+                'SELECT el.email_key, el.status, el.attempts, el.sent_at, u.name, u.email
+                 FROM email_log el JOIN users u ON u.id = el.user_id ORDER BY el.sent_at DESC LIMIT 50'
+            )->fetchAll(),
+            'optOuts' => (int) $pdo->query('SELECT COUNT(*) FROM users WHERE email_opt_out = 1')->fetchColumn(),
+            'lastRun' => is_file($lastRunFile) ? trim((string) file_get_contents($lastRunFile)) : null,
+            'cronPath' => APP_ROOT . '/cron/emails.php',
+        ]);
+    }
+
+    /** Aperçu d'un modèle d'e-mail, rempli avec des données d'exemple et le compte de l'admin. */
+    public function emailPreview(string $key): void
+    {
+        if (!isset(RetentionMailer::RULES[$key])) {
+            http_response_code(404);
+            echo 'Modèle inconnu.';
+            return;
+        }
+        $mail = RetentionMailer::preview($key, Auth::user());
+        echo $mail['html'];
+    }
+
+    // -------------------------------------------------------------
     // Abonnements / revenus
     // -------------------------------------------------------------
     public function subscriptions(): void

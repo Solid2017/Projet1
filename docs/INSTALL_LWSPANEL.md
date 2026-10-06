@@ -134,6 +134,28 @@ dépasse la marge dégagée par les 2000 FCFA/mois.
 3. Ouvre **Mentor IA** et envoie un message pour vérifier que la connexion au fournisseur IA fonctionne (sinon, vérifie `storage/app.log` et la configuration `ai`).
 4. Connecte-toi avec le compte admin pour gérer les parcours, modules, leçons et utilisateurs depuis **Administration**.
 
+## 8. Activer les e-mails automatiques de fidélisation
+
+La plateforme envoie seule 9 e-mails de suivi (première question au mentor, première leçon, essai gratuit presque épuisé, fin d'abonnement, inactivité, résumé du lundi…). Chaque e-mail part une seule fois par personne, jamais plus d'un e-mail tous les 2 jours (sauf les rappels de fin d'abonnement), et chacun contient un lien de désinscription. Prérequis : la section `mail` de l'étape 6.
+
+1. **Base de données** : dans phpMyAdmin, importe `database/migration_emails_fidelisation.sql`.
+2. **Configuration** : ajoute dans `config/config.php` les sections `retention` et `cron` (copie-les depuis `config.sample.php`). Vérifie que `app.url` contient bien l'adresse publique du site (`https://ton-domaine.tld`) : elle sert à construire les liens des e-mails.
+3. **Tester sans rien envoyer** : dans LWSPanel → **Tâches planifiées (cron)**, crée une tâche ponctuelle avec la commande ci-dessous (remplace le chemin par celui de ton site, visible dans le gestionnaire de fichiers) et regarde le résultat :
+   ```
+   php /home/ton-compte/www/cron/emails.php --dry-run
+   ```
+   Le résultat liste les e-mails qui partiraient, sans les envoyer.
+4. **Programmer l'envoi** : crée une tâche qui s'exécute **toutes les heures** avec la commande :
+   ```
+   php /home/ton-compte/www/cron/emails.php
+   ```
+   Si ton offre ne propose que des tâches par URL, choisis une clé longue et aléatoire dans `'cron' => ['key' => '…']`, puis programme l'URL `https://ton-domaine.tld/cron/emails.php?key=TA_CLE`.
+5. **Suivre les envois** : **Administration → E-mails** affiche le dernier passage de la tâche, les envois et échecs par type d'e-mail, les désinscriptions, et un aperçu de chaque modèle.
+
+**Éviter les spams (important)** : dans LWSPanel → **Zone DNS** de ton domaine, vérifie que les enregistrements **SPF** et **DKIM** sont activés pour la messagerie LWS (souvent proposés en un clic). Sans eux, Gmail et Outlook classent une bonne partie des e-mails en indésirables. Ajoute aussi un enregistrement **DMARC** simple : `_dmarc` de type TXT, valeur `v=DMARC1; p=none;`.
+
+Pour suspendre tous les envois sans supprimer la tâche planifiée : `'retention' => ['enabled' => false, …]`.
+
 ## Maintenance
 
 - Les erreurs applicatives sont journalisées dans `storage/app.log` (protégé par `.htaccess`, à consulter via FTP/gestionnaire de fichiers).

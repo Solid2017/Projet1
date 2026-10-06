@@ -8,11 +8,14 @@ declare(strict_types=1);
  */
 class MailService
 {
-    /** @return array{ok:bool, error?:string} */
-    public static function send(string $toEmail, string $toName, string $subject, string $htmlBody): array
+    /**
+     * @param string[] $extraHeaders En-têtes supplémentaires, ex: 'List-Unsubscribe: <https://…>'
+     * @return array{ok:bool, error?:string}
+     */
+    public static function send(string $toEmail, string $toName, string $subject, string $htmlBody, array $extraHeaders = []): array
     {
         try {
-            self::deliver($toEmail, $toName, $subject, $htmlBody);
+            self::deliver($toEmail, $toName, $subject, $htmlBody, $extraHeaders);
             return ['ok' => true];
         } catch (Throwable $e) {
             $message = 'Erreur envoi e-mail (' . $toEmail . ') : ' . $e->getMessage();
@@ -22,7 +25,8 @@ class MailService
         }
     }
 
-    private static function deliver(string $toEmail, string $toName, string $subject, string $htmlBody): void
+    /** @param string[] $extraHeaders */
+    private static function deliver(string $toEmail, string $toName, string $subject, string $htmlBody, array $extraHeaders): void
     {
         $cfg = APP_CONFIG['mail'] ?? null;
         if (!$cfg || empty($cfg['host'])) {
@@ -72,6 +76,9 @@ class MailService
                 'Content-Transfer-Encoding: 8bit',
                 'Date: ' . date('r'),
             ];
+            foreach ($extraHeaders as $header) {
+                $headers[] = str_replace(["\r", "\n"], '', $header);
+            }
 
             // Transparence SMTP : un "." seul en début de ligne doit être doublé.
             $body = str_replace("\n.", "\n..", $htmlBody);
