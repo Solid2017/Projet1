@@ -547,3 +547,7 @@ label.radio-line, .field label.radio-line { display: flex; align-items: center; 
 .table-wrap th, .table-wrap td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
 .table-wrap th { background: var(--surface-alt); }
 @media (max-width: 600px) { .lesson-content { padding: 20px 16px; } }
+/* Les blocs de code et tableaux larges défilent dans leur cadre au lieu d'élargir la page. */
+.lesson-layout > * { min-width: 0; }
+.lesson-content { overflow-wrap: break-word; }
+.lesson-content p code, .lesson-content li code, .lesson-content td code { overflow-wrap: anywhere; }
