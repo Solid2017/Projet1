@@ -12,7 +12,8 @@
         <p><a href="<?= View::e($lesson['video_url']) ?>" target="_blank" rel="noopener" class="btn btn-outline btn-sm">▶ Voir la vidéo complémentaire</a></p>
       <?php endif; ?>
 
-      <?= View::markdown((string) $lesson['content']) ?>
+      <?php // Le titre est déjà affiché au-dessus : on ignore un éventuel « # Titre » en tête du contenu. ?>
+      <?= View::markdown(preg_replace('/\A\s*# [^\n]*\n?/', '', (string) $lesson['content'])) ?>
 
       <div class="lesson-actions">
         <?php if ($status !== 'completed'): ?>

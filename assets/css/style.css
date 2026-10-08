@@ -526,3 +526,24 @@ label.radio-line, .field label.radio-line { display: flex; align-items: center; 
 @media (max-width: 860px) {
   table.data-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 }
+
+/* ---------- Contenu riche des leçons et réponses du mentor (Markdown) ---------- */
+.lesson-content { line-height: 1.7; }
+.lesson-content h2 { font-size: 1.35rem; padding-top: .4em; border-top: 1px solid var(--border); }
+.lesson-content h1 + h2, .lesson-content h1 + p + h2 { border-top: none; }
+.lesson-content h4 { margin: 1.2em 0 .4em; font-size: 1rem; }
+.lesson-content ul, .lesson-content ol, .msg-assistant ul, .msg-assistant ol { padding-left: 22px; margin: 0 0 1em; }
+.lesson-content li, .msg-assistant li { margin-bottom: 6px; }
+.lesson-content blockquote, .msg-assistant blockquote {
+  margin: 18px 0; padding: 14px 18px; background: var(--blue-light); border-left: 4px solid var(--blue);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0; color: var(--ink);
+}
+.lesson-content blockquote p:last-child, .msg-assistant blockquote p:last-child { margin-bottom: 0; }
+.lesson-content hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+.lesson-content img { max-width: 100%; height: auto; border-radius: var(--radius-md); }
+.lesson-content pre, .msg-assistant pre { overflow-x: auto; }
+.table-wrap { overflow-x: auto; margin: 0 0 1em; }
+.table-wrap table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+.table-wrap th, .table-wrap td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+.table-wrap th { background: var(--surface-alt); }
+@media (max-width: 600px) { .lesson-content { padding: 20px 16px; } }
