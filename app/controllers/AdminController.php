@@ -75,6 +75,74 @@ class AdminController
     }
 
     // -------------------------------------------------------------
+    // Codes d'accès (paiement manuel Mobile Money)
+    // -------------------------------------------------------------
+    public function codes(): void
+    {
+        $new = null;
+        $newLearner = null;
+        if (($newId = (int) Request::input('new', 0)) > 0) {
+            $new = AccessCode::find($newId);
+            if ($new && !empty($new['reserved_email'])) {
+                $newLearner = User::findByEmail($new['reserved_email']);
+            }
+        }
+
+        View::render('admin/codes', [
+            'codes' => AccessCode::recent(50),
+            'unusedCount' => AccessCode::unusedCount(),
+            'new' => $new,
+            'newLearner' => $newLearner,
+            'monthly' => PaymentService::planDetails('monthly'),
+            'annual' => PaymentService::planDetails('annual'),
+            'manual' => PaymentService::isManual(),
+            'error' => Request::input('error'),
+            'notice' => Request::input('notice'),
+        ]);
+    }
+
+    public function codeStore(): void
+    {
+        if (!Request::checkCsrf()) {
+            Router::redirect('admin/codes');
+            return;
+        }
+
+        $plan = PaymentService::planDetails(Request::input('plan') === 'annual' ? 'annual' : 'monthly');
+        $email = strtolower(trim((string) Request::input('reserved_email', '')));
+        if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            Router::redirect('admin/codes?error=' . urlencode("L'adresse e-mail saisie n'est pas valide."));
+            return;
+        }
+        $phone = trim((string) Request::input('learner_phone', ''));
+        if ($phone === '' && $email !== '' && ($learner = User::findByEmail($email))) {
+            $phone = (string) ($learner['whatsapp_number'] ?? '');
+        }
+        $note = mb_substr(trim((string) Request::input('note', '')), 0, 255);
+
+        $code = AccessCode::generate(
+            $plan['plan'],
+            $plan['months'],
+            $plan['amount'],
+            $email !== '' ? $email : null,
+            $phone !== '' ? mb_substr($phone, 0, 30) : null,
+            $note !== '' ? $note : null,
+            Auth::id()
+        );
+
+        Router::redirect('admin/codes?new=' . (int) $code['id']);
+    }
+
+    public function codeRevoke(string $id): void
+    {
+        if (Request::checkCsrf() && AccessCode::revoke((int) $id)) {
+            Router::redirect('admin/codes?notice=' . urlencode('Code annulé : il ne peut plus être utilisé.'));
+            return;
+        }
+        Router::redirect('admin/codes');
+    }
+
+    // -------------------------------------------------------------
     // Parcours
     // -------------------------------------------------------------
     public function tracks(): void

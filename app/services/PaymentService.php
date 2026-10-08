@@ -4,6 +4,9 @@ declare(strict_types=1);
 /**
  * Passerelle de paiement Mobile Money pour l'abonnement au mentor IA.
  *
+ * Deux modes (config payment.provider) : « manual » — l'apprenant paie
+ * sur WhatsApp et reçoit un code d'accès généré par l'admin — ou « cinetpay ».
+ *
  * Implémentée pour CinetPay (agrégateur gérant Airtel Money, Moov Money,
  * Orange Money et cartes en une seule API — très utilisé en Afrique
  * centrale/francophone). Si tu utilises un autre agrégateur ou une
@@ -116,6 +119,105 @@ class PaymentService
             @file_put_contents(APP_ROOT . '/storage/app.log', '[' . date('Y-m-d H:i:s') . '] ' . $message . "\n", FILE_APPEND);
             return ['ok' => false, 'status' => 'error'];
         }
+    }
+
+    /** Mode « manuel » : paiement Mobile Money négocié sur WhatsApp, puis code d'accès généré par l'admin. */
+    public static function isManual(): bool
+    {
+        return (APP_CONFIG['payment']['provider'] ?? 'manual') === 'manual';
+    }
+
+    /** @return array{plan:string, months:int, amount:int} */
+    public static function planDetails(string $plan): array
+    {
+        $cfg = APP_CONFIG['payment'] ?? [];
+        return $plan === 'annual'
+            ? ['plan' => 'annual', 'months' => 12, 'amount' => (int) ($cfg['amount_fcfa_annual'] ?? 20000)]
+            : ['plan' => 'monthly', 'months' => 1, 'amount' => (int) ($cfg['amount_fcfa'] ?? 2000)];
+    }
+
+    /** Numéro WhatsApp à contacter pour payer (format international sans « + »), ou '' s'il n'est pas configuré. */
+    public static function whatsappNumber(): string
+    {
+        $number = APP_CONFIG['payment']['whatsapp_number'] ?? '';
+        if ($number === '') {
+            $number = APP_CONFIG['social']['whatsapp_number'] ?? '';
+        }
+        return self::waDigits((string) $number);
+    }
+
+    /** Lien wa.me avec message prérempli ; sans numéro, WhatsApp laisse choisir le contact. */
+    public static function whatsappLink(string $phone, string $text): string
+    {
+        $digits = self::waDigits($phone);
+        return 'https://wa.me/' . $digits . '?text=' . rawurlencode($text);
+    }
+
+    /** "+235 66 12 34 56" ou "66 12 34 56" → "23566123456" */
+    public static function waDigits(string $phone): string
+    {
+        $digits = preg_replace('/\D/', '', $phone) ?? '';
+        if (str_starts_with($digits, '00')) {
+            $digits = substr($digits, 2);
+        }
+        // Numéro tchadien local (8 chiffres) : on ajoute l'indicatif +235.
+        if (strlen($digits) === 8) {
+            $digits = '235' . $digits;
+        }
+        return $digits;
+    }
+
+    /**
+     * Active l'abonnement de l'apprenant avec un code d'accès généré par
+     * l'administrateur après réception de son transfert Mobile Money.
+     *
+     * @return array{ok:bool, message:string}
+     */
+    public static function redeemAccessCode(array $user, string $input): array
+    {
+        $code = AccessCode::normalize($input);
+        $row = $code !== '' ? AccessCode::findByCode($code) : null;
+
+        if (!$row) {
+            return ['ok' => false, 'message' => 'Code invalide. Vérifie-le (format IGO-XXXX-XXXX) ou contacte-nous sur WhatsApp.'];
+        }
+        if ($row['revoked_at'] !== null) {
+            return ['ok' => false, 'message' => "Ce code a été annulé. Contacte-nous sur WhatsApp pour en recevoir un nouveau."];
+        }
+        if ($row['used_at'] !== null) {
+            return ['ok' => false, 'message' => (int) $row['used_by'] === (int) $user['id']
+                ? 'Tu as déjà utilisé ce code : ton abonnement est activé.'
+                : 'Ce code a déjà été utilisé.'];
+        }
+        if (!empty($row['reserved_email']) && strcasecmp($row['reserved_email'], $user['email']) !== 0) {
+            return ['ok' => false, 'message' => "Ce code est réservé à un autre compte. Connecte-toi avec l'adresse e-mail communiquée lors du paiement."];
+        }
+
+        $pdo = Database::connection();
+        $pdo->beginTransaction();
+        try {
+            if (!AccessCode::markUsed((int) $row['id'], (int) $user['id'])) {
+                $pdo->rollBack();
+                return ['ok' => false, 'message' => 'Ce code a déjà été utilisé.'];
+            }
+
+            $formatted = AccessCode::format($code);
+            $paymentId = Payment::create((int) $user['id'], 'code_' . $code, 'manual', (int) $row['amount_fcfa'], (string) ($row['learner_phone'] ?? ''), 'MOBILE_MONEY_MANUEL', $row['plan']);
+            Payment::markSuccess($paymentId, $formatted, json_encode(['code' => $formatted, 'note' => $row['note']], JSON_UNESCAPED_UNICODE));
+            Subscription::activate((int) $user['id'], (int) $row['amount_fcfa'], (int) $row['months']);
+            self::rewardReferralIfFirstPayment((int) $user['id']);
+
+            $pdo->commit();
+        } catch (Throwable $e) {
+            $pdo->rollBack();
+            $message = 'Erreur activation code (' . AccessCode::format($code) . ') : ' . $e->getMessage();
+            error_log('[IgoTech IA] ' . $message);
+            @file_put_contents(APP_ROOT . '/storage/app.log', '[' . date('Y-m-d H:i:s') . '] ' . $message . "\n", FILE_APPEND);
+            return ['ok' => false, 'message' => "Une erreur est survenue, ton code n'a pas été consommé. Réessaie dans un instant."];
+        }
+
+        $months = (int) $row['months'];
+        return ['ok' => true, 'message' => 'Code accepté ! Ton accès au mentor IA est activé pour ' . ($months === 12 ? '1 an' : ($months === 1 ? '1 mois' : $months . ' mois')) . '.'];
     }
 
     /** Récompense le parrain et le filleul (jours d'abonnement offerts) au tout premier paiement réussi du filleul. */

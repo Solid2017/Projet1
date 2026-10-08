@@ -503,3 +503,26 @@ footer.site-footer a { color: var(--muted); text-decoration: underline; }
   .account-menu-label { display: none; }
   .account-menu-panel { position: fixed; top: 64px; left: 14px; right: 14px; min-width: 0; }
 }
+
+/* ---------- Paiement manuel (WhatsApp + code d'accès) ---------- */
+label.radio-line, .field label.radio-line { display: flex; align-items: center; gap: 8px; font-weight: 400; cursor: pointer; margin: 8px 0 0; }
+.field label.radio-line:first-of-type { margin-top: 0; }
+.pay-steps { margin: 4px 0 18px; padding-left: 20px; color: var(--muted); line-height: 1.6; font-size: .93rem; }
+.pay-steps li { margin-bottom: 8px; }
+.pay-steps strong { color: var(--ink); }
+.btn-whatsapp { background: #0E8A4F; color: #fff; box-shadow: 0 4px 14px rgba(14,138,79,.25); }
+.btn-whatsapp:hover { background: #0B7442; color: #fff; }
+.access-code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 1.9rem; font-weight: 700; letter-spacing: .08em; color: var(--blue); margin: 12px 0 6px; overflow-wrap: anywhere; }
+.access-code-sm { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight: 600; letter-spacing: .04em; white-space: nowrap; }
+.access-code-input { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 1.15rem; letter-spacing: .08em; text-transform: uppercase; }
+.access-code-input::placeholder { text-transform: none; letter-spacing: .04em; }
+.code-new { border: 2px solid var(--blue); }
+.code-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+@media (max-width: 480px) { .access-code { font-size: 1.45rem; } .code-actions .btn { width: 100%; } }
+.field label.radio-line input { width: auto; flex: none; margin: 0; padding: 0; box-shadow: none; }
+.data-table .badge { white-space: nowrap; }
+/* Tableaux admin : défilement horizontal dans le tableau plutôt que débordement de la page. */
+.admin-layout > * { min-width: 0; }
+@media (max-width: 860px) {
+  table.data-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}

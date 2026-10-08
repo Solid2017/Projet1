@@ -238,7 +238,7 @@ class RetentionMailer
                 $date = self::frenchDate((string) $row['expires_at']);
                 $subject = "Ton abonnement IgoTech IA se termine le {$date}";
                 $o = [
-                    'preheader' => 'Renouvelle en une minute avec Airtel Money ou Moov Money.',
+                    'preheader' => 'Renouvelle avec Airtel Money ou Moov Money pour garder ton mentor.',
                     'title' => "{$first}, ton accès au mentor IA se termine le {$e($date)}",
                     'paragraphs' => [
                         'Pour garder ton rythme, tes conversations et l’accès illimité à ton mentor IA, pense à renouveler avant cette date.',

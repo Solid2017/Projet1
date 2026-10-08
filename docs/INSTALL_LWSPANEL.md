@@ -26,6 +26,7 @@ dans l'ordre :
 3. `database/seed_more_tracks.sql` (parcours supplémentaires, optionnel)
 4. `database/migration_subscriptions.sql` (abonnement payant au mentor IA — voir section 5)
 5. `database/migration_password_resets.sql` (mot de passe oublié)
+6. `database/migration_paiement_manuel.sql` (paiement manuel par WhatsApp + codes d'accès — voir section 5)
 
 > Le compte admin de démonstration est `admin@igotech.ia` / `IgoTech2026!`.
 > **Change ce mot de passe immédiatement** après la première connexion,
@@ -64,10 +65,50 @@ Dans `config/config.php`, section `ai` :
 ## 5. Activer l'abonnement payant au mentor IA (Mobile Money)
 
 L'accès au mentor IA est réservé aux apprenants ayant un abonnement actif
-(2000 FCFA/mois par défaut). Le paiement se fait par **Airtel Money** ou
-**Moov Money**, via l'agrégateur **CinetPay** (https://cinetpay.com), qui
-gère les deux opérateurs (et les cartes) avec une seule API — pas besoin
-d'un compte marchand séparé chez chaque opérateur.
+(2000 FCFA/mois ou 20 000 FCFA/an par défaut). Deux modes de paiement, au
+choix dans `config/config.php` → `'payment' => ['provider' => …]` :
+
+### 5a. Paiement manuel par WhatsApp + code d'accès (recommandé au lancement)
+
+Aucun contrat ni agrégateur : l'argent arrive directement sur ton compte
+Airtel Money ou Moov Money.
+
+1. Dans phpMyAdmin, importe `database/migration_paiement_manuel.sql`.
+2. Dans `config/config.php`, section `payment` :
+   ```php
+   'payment' => [
+       'provider'           => 'manual',
+       'whatsapp_number'    => '23566000000', // ton numéro WhatsApp, format international sans le +
+       'amount_fcfa'        => 2000,
+       'amount_fcfa_annual' => 20000,
+   ],
+   ```
+3. Le parcours, une fois en place :
+   1. Sur la page **Abonnement**, l'apprenant choisit sa formule et clique sur
+      **Payer via WhatsApp** : un message prérempli (formule, nom, e-mail du
+      compte) s'ouvre vers ton numéro.
+   2. Tu lui indiques ton numéro Airtel Money / Moov Money ; il fait le
+      transfert et t'envoie la confirmation.
+   3. Dans **Administration → Codes d'accès**, choisis la formule, saisis
+      l'e-mail de son compte (le code ne marchera que pour lui) et la
+      référence du transfert, puis **Générer le code**.
+   4. Clique sur **Envoyer le code sur WhatsApp** : le message avec le code
+      (`IGO-XXXX-XXXX`) et le lien d'activation est prêt à partir.
+   5. L'apprenant saisit le code dans **J'ai reçu mon code** : son accès au
+      mentor s'active immédiatement (ou se prolonge s'il est déjà abonné).
+4. Chaque code ne sert qu'une fois. Un code envoyé par erreur peut être
+   **annulé** tant qu'il n'a pas été utilisé. Après 5 codes faux en 15
+   minutes, la saisie est bloquée temporairement (protection contre les
+   tentatives au hasard).
+5. Les paiements par code apparaissent dans **Administration → Abonnements**
+   (canal « Code IGO-… ») et comptent dans le revenu du mois. Le parrainage
+   est récompensé au premier code utilisé, comme pour un paiement en ligne.
+
+### 5b. Paiement automatique via CinetPay (optionnel)
+
+Le paiement se fait par **Airtel Money** ou **Moov Money**, via l'agrégateur
+**CinetPay** (https://cinetpay.com). Vérifie d'abord avec CinetPay qu'ils
+couvrent bien le Tchad (XAF) avec ces deux opérateurs pour ton compte.
 
 1. Crée un compte sur https://cinetpay.com, complète la vérification KYC
    (documents d'entreprise/identité — nécessaire pour recevoir de vrais
@@ -83,6 +124,7 @@ d'un compte marchand séparé chez chaque opérateur.
        'base_url'    => 'https://api-checkout.cinetpay.com',
        'currency'    => 'XAF',
        'amount_fcfa' => 2000,
+       'amount_fcfa_annual' => 20000,
    ],
    ```
 4. Dans le tableau de bord CinetPay, configure l'URL de notification
@@ -90,12 +132,9 @@ d'un compte marchand séparé chez chaque opérateur.
    l'interface le demande explicitement (sinon elle est déjà transmise à
    chaque paiement par l'application elle-même).
 5. Teste un paiement réel avec un petit montant avant de communiquer sur le
-   lancement — un agrégateur de paiement peut faire évoluer le format exact
-   de ses réponses API ; si le paiement CinetPay réussit mais que l'accès au
-   mentor ne se débloque pas côté IgoTech IA, vérifie `storage/app.log` et
-   compare la réponse reçue à celle attendue dans
-   `app/services/PaymentService.php` (documentation à jour :
-   https://docs.cinetpay.com).
+   lancement. Si le paiement échoue, la réponse exacte de CinetPay est
+   journalisée dans `storage/app.log` (ligne « Erreur initiation paiement »).
+   Les codes d'accès de la section 5a restent utilisables en secours.
 
 **Suivi des revenus** : l'onglet **Administration → Abonnements** affiche le
 nombre d'abonnés actifs, le revenu du mois en cours et l'historique des

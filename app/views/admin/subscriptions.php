@@ -1,5 +1,5 @@
 <div class="container">
-  <div class="page-header"><h1>Abonnements &amp; revenus</h1><p>Mentor IA — paiements Mobile Money (Airtel Money / Moov Money).</p></div>
+  <div class="page-header"><h1>Abonnements &amp; revenus</h1><p>Mentor IA — paiements Mobile Money (Airtel Money / Moov Money). Pour un paiement reçu sur WhatsApp, génère un code dans <a href="<?= Router::url('admin/codes') ?>">Codes d'accès</a>.</p></div>
 
   <div class="admin-layout">
     <?php View::partial('admin/_nav', ['current' => 'subscriptions']); ?>
@@ -23,7 +23,7 @@
             <td><?= View::e(date('d/m/Y H:i', strtotime($p['created_at']))) ?></td>
             <td><?= View::e($p['user_name']) ?><br><span style="color:var(--muted);font-size:.8rem;"><?= View::e($p['user_email']) ?></span></td>
             <td><?= (int) $p['amount_fcfa'] ?> FCFA</td>
-            <td><?= View::e($p['channel'] ?? '—') ?></td>
+            <td><?= View::e(($p['provider'] ?? '') === 'manual' ? 'Code ' . ($p['provider_reference'] ?? '') : ($p['channel'] ?? '—')) ?></td>
             <td>
               <?php if ($p['status'] === 'success'): ?><span class="badge badge-blue">Réussi</span>
               <?php elseif ($p['status'] === 'pending'): ?><span class="badge badge-muted">En attente</span>

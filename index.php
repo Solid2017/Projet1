@@ -43,6 +43,7 @@ Router::post('api/chat/{id}/send', [ChatController::class, 'send']);
 
 Router::get('subscribe', [SubscriptionController::class, 'pricing']);
 Router::post('subscribe/pay', [SubscriptionController::class, 'pay']);
+Router::post('subscribe/code', [SubscriptionController::class, 'redeem']);
 Router::get('subscribe/return', [SubscriptionController::class, 'returnFromProvider']);
 Router::post('payments/cinetpay/webhook', [SubscriptionController::class, 'webhook']);
 
@@ -77,6 +78,9 @@ Router::post('admin/users/{id}/toggle', [AdminController::class, 'userToggle']);
 Router::get('admin/users/{id}/mentor', [AdminController::class, 'mentorEdit']);
 Router::post('admin/users/{id}/mentor', [AdminController::class, 'mentorUpdate']);
 Router::get('admin/subscriptions', [AdminController::class, 'subscriptions']);
+Router::get('admin/codes', [AdminController::class, 'codes']);
+Router::post('admin/codes', [AdminController::class, 'codeStore']);
+Router::post('admin/codes/{id}/revoke', [AdminController::class, 'codeRevoke']);
 Router::get('admin/emails', [AdminController::class, 'emails']);
 Router::get('admin/emails/preview/{key}', [AdminController::class, 'emailPreview']);
 

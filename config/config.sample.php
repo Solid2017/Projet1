@@ -56,31 +56,35 @@ return [
     ],
 
     // -------------------------------------------------------------
-    // Paiement Mobile Money (Airtel Money / Moov Money) pour
-    // l'abonnement au mentor IA — 2000 FCFA / mois.
+    // Paiement de l'abonnement au mentor IA — 2000 FCFA / mois.
     //
-    // Recommandé : CinetPay (https://cinetpay.com), un agrégateur qui
-    // gère Airtel Money, Moov Money, Orange Money et les cartes via une
-    // seule API, sans qu'IgoTech ait besoin d'un compte marchand séparé
-    // chez chaque opérateur. Crée un compte CinetPay, active le Tchad
-    // dans tes pays de collecte, puis récupère "apikey" et "site_id"
-    // dans Réglages > Clés API du tableau de bord CinetPay.
+    // 'manual' (recommandé au lancement) : l'apprenant clique sur
+    // « Payer via WhatsApp », tu lui indiques le numéro Airtel Money /
+    // Moov Money où envoyer l'argent, puis tu génères son code d'accès
+    // dans Administration → Codes d'accès et tu le lui envoies. Il saisit
+    // le code sur la page Abonnement : le mentor se débloque aussitôt.
+    // Aucun contrat ni agrégateur nécessaire.
     //
-    // ⚠️ Vérifie ces noms de champs dans la doc CinetPay au moment de
-    // la mise en prod (https://docs.cinetpay.com) : un agrégateur de
-    // paiement peut faire évoluer son API sans préavis, et ce fichier a
-    // été écrit sans compte CinetPay actif pour le tester en conditions
-    // réelles.
+    // 'cinetpay' : paiement automatique via l'agrégateur CinetPay
+    // (https://cinetpay.com). Nécessite un compte marchand validé et le
+    // Tchad activé dans tes pays de collecte ; renseigne alors "api_key"
+    // et "site_id" (Réglages > Clés API du tableau de bord CinetPay).
     // -------------------------------------------------------------
     'payment' => [
-        'provider'    => 'cinetpay',
+        'provider'    => 'manual', // 'manual' ou 'cinetpay'
+        // Numéro WhatsApp qui reçoit les demandes de paiement (format
+        // international, ex: '23566000000'). Si vide, le numéro de la
+        // section 'social' ci-dessous est utilisé.
+        'whatsapp_number' => '',
+        'amount_fcfa' => 2000,
+        // Offre annuelle : 20 000 FCFA = 10 mois payés, 2 mois offerts.
+        'amount_fcfa_annual' => 20000,
+
+        // Uniquement pour 'cinetpay' :
         'api_key'     => 'CHANGE-MOI',
         'site_id'     => 'CHANGE-MOI',
         'base_url'    => 'https://api-checkout.cinetpay.com',
         'currency'    => 'XAF', // XAF = franc CFA (zone BEAC, dont le Tchad)
-        'amount_fcfa' => 2000,
-        // Offre annuelle : 20 000 FCFA = 10 mois payés, 2 mois offerts.
-        'amount_fcfa_annual' => 20000,
     ],
 
     // -------------------------------------------------------------

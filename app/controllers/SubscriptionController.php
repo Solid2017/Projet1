@@ -3,17 +3,50 @@ declare(strict_types=1);
 
 class SubscriptionController
 {
-    /** Page d'abonnement : tarif, statut actuel, formulaire Mobile Money. */
+    /** Page d'abonnement : tarif, statut actuel, paiement (WhatsApp + code d'accès, ou CinetPay). */
     public function pricing(): void
     {
         Auth::requireLogin();
 
         View::render('subscribe/index', [
             'subscription' => Subscription::current(Auth::id()),
-            'amount' => APP_CONFIG['payment']['amount_fcfa'] ?? 2000,
-            'amountAnnual' => APP_CONFIG['payment']['amount_fcfa_annual'] ?? 20000,
+            'amount' => PaymentService::planDetails('monthly')['amount'],
+            'amountAnnual' => PaymentService::planDetails('annual')['amount'],
+            'manual' => PaymentService::isManual(),
+            'whatsappNumber' => PaymentService::whatsappNumber(),
+            'user' => Auth::user(),
             'error' => Request::input('error'),
+            'success' => Request::input('success'),
         ]);
+    }
+
+    /** Paiement manuel : l'apprenant saisit le code d'accès reçu sur WhatsApp. */
+    public function redeem(): void
+    {
+        Auth::requireLogin();
+        if (!Request::checkCsrf()) {
+            Router::redirect('subscribe');
+            return;
+        }
+
+        // Limite anti-devinette : 5 codes faux par quart d'heure.
+        $now = time();
+        $failures = array_filter($_SESSION['access_code_failures'] ?? [], fn ($t) => $t > $now - 900);
+        if (count($failures) >= 5) {
+            Router::redirect('subscribe?error=' . urlencode("Trop d'essais. Réessaie dans 15 minutes ou contacte-nous sur WhatsApp."));
+            return;
+        }
+
+        $result = PaymentService::redeemAccessCode(Auth::user(), (string) Request::input('code', ''));
+        if (!$result['ok']) {
+            $failures[] = $now;
+            $_SESSION['access_code_failures'] = array_values($failures);
+            Router::redirect('subscribe?error=' . urlencode($result['message']));
+            return;
+        }
+
+        unset($_SESSION['access_code_failures']);
+        Router::redirect('subscribe?success=' . urlencode($result['message']));
     }
 
     /** Démarre le paiement et redirige vers la page de paiement CinetPay. */
@@ -21,6 +54,11 @@ class SubscriptionController
     {
         Auth::requireLogin();
         if (!Request::checkCsrf()) {
+            Router::redirect('subscribe');
+            return;
+        }
+
+        if (PaymentService::isManual()) {
             Router::redirect('subscribe');
             return;
         }
