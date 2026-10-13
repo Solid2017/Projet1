@@ -101,7 +101,7 @@ $codeMessage = function (array $c, string $name = '') use ($subscribeUrl): strin
             </td>
             <td style="white-space:nowrap;">
               <?php if (!$c['used_at'] && !$c['revoked_at']): ?>
-                <a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="<?= View::e(PaymentService::whatsappLink((string) ($c['learner_phone'] ?? ''), $codeMessage($c))) ?>">WhatsApp</a>
+                <a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="<?= View::e(PaymentService::whatsappLink((string) ($c['learner_phone'] ?? ''), $codeMessage($c))) ?>">Envoyer sur WhatsApp</a>
                 <form class="inline-form" method="post" action="<?= Router::url('admin/codes/' . (int) $c['id'] . '/revoke') ?>" onsubmit="return confirm('Annuler ce code ? Il ne pourra plus être utilisé.');">
                   <?= Auth::csrfField() ?>
                   <button class="btn btn-ghost btn-sm" type="submit">Annuler</button>
