@@ -54,13 +54,31 @@ côte à côte avec les fichiers publics.
 
 ## 4. Choisir le fournisseur du mentor IA
 
-Dans `config/config.php`, section `ai` :
+### Option gratuite (recommandée au démarrage)
 
-| Fournisseur | `provider`   | Où obtenir la clé                           | Remarque |
-|-------------|--------------|----------------------------------------------|----------|
-| Claude (Anthropic) | `anthropic` | https://console.anthropic.com | Recommandé, `model: claude-sonnet-5` |
-| OpenAI / compatible | `openai`    | https://platform.openai.com   | Fonctionne aussi avec un proxy compatible OpenAI |
-| Ollama (local)      | `ollama`    | aucune clé nécessaire          | Nécessite un serveur exécutant Ollama, accessible en réseau depuis l'hébergement (rarement possible sur un mutualisé classique) |
+Le mentor peut fonctionner sans frais avec les offres gratuites de **Groq** (modèles Llama) et de **Google Gemini**, toutes deux compatibles avec le format OpenAI. Si le quota gratuit du jour d'un fournisseur est épuisé, la plateforme bascule automatiquement sur le suivant (`ai_fallbacks`).
+
+1. Crée une clé gratuite Groq : https://console.groq.com/keys (compte gratuit, sans carte bancaire).
+2. Crée une clé gratuite Gemini : https://aistudio.google.com/apikey (compte Google).
+3. Copie les sections `ai` et `ai_fallbacks` de `config/config.sample.php` dans `config/config.php`, et remplace `CLE-GROQ` et `CLE-GEMINI` par tes clés.
+4. Envoie un message au mentor IA pour tester. En cas de problème, `storage/app.log` indique quel fournisseur a échoué et pourquoi (clé invalide, quota épuisé, modèle introuvable).
+
+À savoir :
+
+- Les quotas gratuits sont **partagés par tous les apprenants** de la plateforme et se comptent par jour. Ils conviennent au lancement ; quand le nombre d'abonnés augmente, ajoute un fournisseur payant en secours (exemple commenté dans `config.sample.php`) ou passe à l'offre payante de Groq.
+- Les noms de modèles et les limites changent régulièrement : vérifie-les dans la console de chaque fournisseur (pages *Models* et *Limits* de Groq, documentation de Google AI Studio). Un modèle retiré apparaît dans `storage/app.log` avec une erreur 404.
+- Lis les conditions d'utilisation : avec l'offre gratuite de Gemini, Google peut utiliser les conversations pour améliorer ses produits. Rappelle aux apprenants de ne jamais écrire de mot de passe ni de donnée personnelle sensible au mentor.
+
+### Autres fournisseurs
+
+| Fournisseur | `provider` | Où obtenir la clé | Remarque |
+|-------------|------------|-------------------|----------|
+| Groq | `openai` | https://console.groq.com/keys | Gratuit avec quotas ; `base_url` : `https://api.groq.com/openai` |
+| Google Gemini | `openai` | https://aistudio.google.com/apikey | Gratuit avec quotas ; `base_url` : `https://generativelanguage.googleapis.com/v1beta/openai` |
+| OpenRouter | `openai` | https://openrouter.ai/keys | Modèles `:free` très limités par jour ; `base_url` : `https://openrouter.ai/api/v1` |
+| Claude (Anthropic) | `anthropic` | https://console.anthropic.com | Payant, meilleure qualité pédagogique |
+| OpenAI | `openai` | https://platform.openai.com | Payant |
+| Ollama (local) | `ollama` | aucune clé nécessaire | Nécessite un serveur exécutant Ollama, accessible depuis l'hébergement (rarement possible sur un mutualisé) |
 
 ## 5. Activer l'abonnement payant au mentor IA (Mobile Money)
 

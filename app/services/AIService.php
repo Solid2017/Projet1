@@ -4,7 +4,12 @@ declare(strict_types=1);
 /**
  * Passerelle vers le modèle de langage du mentor IA.
  * Fournisseurs supportés : "anthropic" (Claude), "openai" (ou toute API
- * compatible OpenAI), "ollama" (modèle exécuté en local, sans clé API).
+ * compatible OpenAI : Groq, Google Gemini, OpenRouter…), "ollama" (modèle
+ * exécuté en local, sans clé API).
+ *
+ * Bascule automatique : si le fournisseur principal échoue (quota gratuit
+ * du jour épuisé, panne, clé invalide), les fournisseurs de secours listés
+ * dans 'ai_fallbacks' (config.php) sont essayés dans l'ordre.
  */
 class AIService
 {
@@ -14,32 +19,44 @@ class AIService
      */
     public static function reply(string $systemPrompt, array $history): array
     {
-        $cfg = APP_CONFIG['ai'];
-        $provider = $cfg['provider'] ?? 'anthropic';
+        $chain = array_merge([APP_CONFIG['ai']], APP_CONFIG['ai_fallbacks'] ?? []);
 
-        try {
-            $content = match ($provider) {
-                'anthropic' => self::callAnthropic($cfg, $systemPrompt, $history),
-                'openai'    => self::callOpenAi($cfg, $systemPrompt, $history),
-                'ollama'    => self::callOllama($cfg, $systemPrompt, $history),
-                default     => throw new RuntimeException("Fournisseur IA inconnu : {$provider}"),
-            };
+        foreach ($chain as $index => $cfg) {
+            $provider = $cfg['provider'] ?? 'anthropic';
+            $label = $provider . (isset($cfg['model']) ? ' / ' . $cfg['model'] : '');
 
-            return ['ok' => true, 'content' => $content];
-        } catch (Throwable $e) {
-            $message = 'Erreur mentor IA (' . $provider . ') : ' . $e->getMessage();
-            error_log('[IgoTech IA] ' . $message);
-            @file_put_contents(
-                APP_ROOT . '/storage/app.log',
-                '[' . date('Y-m-d H:i:s') . '] ' . $message . "\n",
-                FILE_APPEND
-            );
-            return [
-                'ok' => false,
-                'content' => "Le mentor IA est momentanément indisponible. Vérifie la configuration du " .
-                    "fournisseur IA (config/config.php) ou réessaie dans un instant.",
-            ];
+            try {
+                $content = match ($provider) {
+                    'anthropic' => self::callAnthropic($cfg, $systemPrompt, $history),
+                    'openai'    => self::callOpenAi($cfg, $systemPrompt, $history),
+                    'ollama'    => self::callOllama($cfg, $systemPrompt, $history),
+                    default     => throw new RuntimeException("Fournisseur IA inconnu : {$provider}"),
+                };
+
+                if ($index > 0) {
+                    self::log("Mentor IA servi par le secours n°{$index} ({$label})");
+                }
+                return ['ok' => true, 'content' => $content];
+            } catch (Throwable $e) {
+                self::log('Erreur mentor IA (' . $label . ') : ' . $e->getMessage());
+            }
         }
+
+        return [
+            'ok' => false,
+            'content' => "Le mentor IA est très sollicité en ce moment. Réessaie dans quelques minutes, " .
+                "ou relis la leçon en attendant : ta question est importante !",
+        ];
+    }
+
+    private static function log(string $message): void
+    {
+        error_log('[IgoTech IA] ' . $message);
+        @file_put_contents(
+            APP_ROOT . '/storage/app.log',
+            '[' . date('Y-m-d H:i:s') . '] ' . $message . "\n",
+            FILE_APPEND
+        );
     }
 
     private static function callAnthropic(array $cfg, string $system, array $history): string
@@ -79,7 +96,7 @@ class AIService
 
     private static function callOpenAi(array $cfg, string $system, array $history): string
     {
-        $url = rtrim($cfg['base_url'] ?: 'https://api.openai.com', '/') . '/v1/chat/completions';
+        $url = self::chatCompletionsUrl((string) ($cfg['base_url'] ?? ''));
 
         $messages = array_merge(
             [['role' => 'system', 'content' => $system]],
@@ -99,8 +116,12 @@ class AIService
         ]);
 
         $text = $response['choices'][0]['message']['content'] ?? null;
+        if (is_string($text)) {
+            // Certains modèles « raisonneurs » renvoient leur réflexion entre balises <think>.
+            $text = trim((string) preg_replace('/<think>.*?<\/think>/s', '', $text));
+        }
         if (!$text) {
-            throw new RuntimeException('Réponse OpenAI vide ou inattendue.');
+            throw new RuntimeException('Réponse vide ou inattendue du fournisseur compatible OpenAI.');
         }
 
         return $text;
@@ -130,6 +151,25 @@ class AIService
         }
 
         return $text;
+    }
+
+    /**
+     * Adresse de l'API « chat completions » compatible OpenAI :
+     *   https://api.openai.com                                   → …/v1/chat/completions
+     *   https://api.groq.com/openai                              → …/openai/v1/chat/completions
+     *   https://generativelanguage.googleapis.com/v1beta/openai  → …/v1beta/openai/chat/completions
+     *   https://openrouter.ai/api/v1                             → …/api/v1/chat/completions
+     */
+    public static function chatCompletionsUrl(string $baseUrl): string
+    {
+        $base = rtrim($baseUrl !== '' ? $baseUrl : 'https://api.openai.com', '/');
+        if (str_ends_with($base, '/chat/completions')) {
+            return $base;
+        }
+        if (preg_match('#/v\d+[a-z0-9]*(/openai)?$#', $base)) {
+            return $base . '/chat/completions';
+        }
+        return $base . '/v1/chat/completions';
     }
 
     /** @param string[] $headers */
