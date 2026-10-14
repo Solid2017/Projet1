@@ -1,0 +1,10 @@
+/config/config.php
+/storage/*.log
+/uploads/avatars/*
+!/uploads/avatars/.gitkeep
+.DS_Store
+Thumbs.db
+*.swp
+node_modules/
+/storage/*.lock
+/storage/cron_emails_last_run.txt
