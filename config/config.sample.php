@@ -33,26 +33,57 @@ return [
     // -------------------------------------------------------------
     // Mentor IA — fournisseur du modèle de langage
     //
-    // provider: "anthropic" | "openai" | "ollama"
-    //   - "anthropic": API Claude (https://console.anthropic.com)
-    //   - "openai"   : API OpenAI ou toute API compatible OpenAI
-    //   - "ollama"   : modèle exécuté en local (ex: sur un serveur
-    //                  dédié séparé du mutualisé LWSPanel), pas de clé
-    //                  API nécessaire.
+    // provider: "openai" | "anthropic" | "ollama"
+    //   - "openai"   : toute API compatible OpenAI, dont les offres
+    //                  GRATUITES de Groq et de Google Gemini (ci-dessous)
+    //   - "anthropic": API Claude, payante (https://console.anthropic.com)
+    //   - "ollama"   : modèle exécuté sur ton propre serveur
+    //
+    // Configuration gratuite recommandée : Groq en principal, puis les
+    // secours de 'ai_fallbacks' quand le quota gratuit du jour est épuisé.
+    //   - Clé Groq   : https://console.groq.com/keys (gratuite, sans carte)
+    //   - Clé Gemini : https://aistudio.google.com/apikey (gratuite)
+    // Les quotas gratuits et les noms de modèles évoluent : vérifie-les
+    // dans la console de chaque fournisseur.
     // -------------------------------------------------------------
     'ai' => [
-        'provider'    => 'anthropic',
-        'api_key'     => 'CHANGE-MOI',
-        // claude-haiku-4-5-20251001 : moins cher (~5x que Sonnet), tout à
-        // fait suffisant pour du mentorat pédagogique. C'est ce qui rend
-        // l'abonnement à 2000 FCFA/mois rentable. Repasse sur un modèle
-        // Sonnet si tu veux des réponses plus poussées, au prix d'une
-        // marge plus faible par abonné.
-        'model'       => 'claude-haiku-4-5-20251001',
-        'base_url'    => 'https://api.anthropic.com',
-        // Pour 'ollama', ex: 'http://127.0.0.1:11434'
+        'provider'    => 'openai',
+        'api_key'     => 'CLE-GROQ',
+        'model'       => 'llama-3.3-70b-versatile',
+        'base_url'    => 'https://api.groq.com/openai',
         'temperature' => 0.6,
         'max_tokens'  => 1024,
+    ],
+
+    // Fournisseurs de secours, essayés dans l'ordre si le précédent échoue
+    // (quota épuisé, panne). Mets [] pour désactiver.
+    'ai_fallbacks' => [
+        [
+            // Modèle plus petit de Groq : quota quotidien séparé et plus large.
+            'provider'    => 'openai',
+            'api_key'     => 'CLE-GROQ',
+            'model'       => 'llama-3.1-8b-instant',
+            'base_url'    => 'https://api.groq.com/openai',
+            'temperature' => 0.6,
+            'max_tokens'  => 1024,
+        ],
+        [
+            // Google Gemini, offre gratuite (API compatible OpenAI).
+            'provider'    => 'openai',
+            'api_key'     => 'CLE-GEMINI',
+            'model'       => 'gemini-flash-lite-latest',
+            'base_url'    => 'https://generativelanguage.googleapis.com/v1beta/openai',
+            'temperature' => 0.6,
+            'max_tokens'  => 1024,
+        ],
+        // Option payante, de meilleure qualité, si tu ajoutes un jour une clé Claude :
+        // [
+        //     'provider'   => 'anthropic',
+        //     'api_key'    => 'CLE-ANTHROPIC',
+        //     'model'      => 'claude-haiku-4-5-20251001',
+        //     'base_url'   => 'https://api.anthropic.com',
+        //     'max_tokens' => 1024,
+        // ],
     ],
 
     // -------------------------------------------------------------
