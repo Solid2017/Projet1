@@ -213,6 +213,19 @@ La plateforme envoie seule 9 e-mails de suivi (première question au mentor, pre
 
 Pour suspendre tous les envois sans supprimer la tâche planifiée : `'retention' => ['enabled' => false, …]`.
 
+## 9. Proposer l'application Android
+
+L'application Android (`assets/app/igotech-ia.apk`) affiche la plateforme `https://ia.igotech.tech` dans une fenêtre dédiée : **mêmes comptes, même base de données**, rien à installer côté serveur. Elle ouvre WhatsApp, le téléphone et les liens externes dans les bonnes applications, permet d'envoyer sa photo de profil et affiche un écran « Pas de connexion » avec un bouton Réessayer.
+
+1. Envoie sur le serveur les dossiers `assets/app/`, `app/services/MobileApp.php`, `app/controllers/MobileAppController.php`, `app/views/app/`, ainsi que `index.php`, `.htaccess`, `app/views/layout/footer.php`, `assets/css/style.css` et `assets/js/app.js`.
+2. Dès que le fichier `assets/app/igotech-ia.apk` est présent :
+   - une **proposition flottante** « IgoTech IA sur ton téléphone » apparaît en bas à gauche, sur Android et sur ordinateur (jamais sur iPhone, ni dans l'application elle-même). Fermée, elle ne revient pas avant 30 jours ;
+   - la page **/application** explique l'installation pas à pas ;
+   - un lien « Application Android » s'ajoute au pied de page.
+3. Pour retirer la proposition, il suffit de supprimer `assets/app/igotech-ia.apk`.
+
+**Mettre à jour l'application** (nouveau domaine, nouvelle icône…) : le code source est dans `mobile/android/` ; le fichier `mobile/android/README.md` explique comment reconstruire l'APK. La nouvelle version doit être signée avec **la même clé** (`igotech-release.jks`) pour s'installer par-dessus l'ancienne.
+
 ## Maintenance
 
 - Les erreurs applicatives sont journalisées dans `storage/app.log` (protégé par `.htaccess`, à consulter via FTP/gestionnaire de fichiers).

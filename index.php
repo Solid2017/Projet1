@@ -50,6 +50,7 @@ Router::post('payments/cinetpay/webhook', [SubscriptionController::class, 'webho
 Router::get('parrainage', [ReferralController::class, 'index']);
 Router::get('certificate/{code}', [CertificateController::class, 'show']);
 Router::get('mentors', [MentorController::class, 'index']);
+Router::get('application', [MobileAppController::class, 'index']);
 
 Router::get('email/unsubscribe', [EmailController::class, 'showUnsubscribe']);
 Router::post('email/unsubscribe', [EmailController::class, 'unsubscribe']);

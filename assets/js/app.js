@@ -96,6 +96,25 @@
   }
 
   // -----------------------------------------------------------
+  // Proposition flottante de l'application Android
+  // -----------------------------------------------------------
+  var appBanner = document.getElementById('app-banner');
+  if (appBanner) {
+    var APP_KEY = 'igotech_app_banner_until';
+    var hideUntil = 0;
+    try { hideUntil = parseInt(window.localStorage.getItem(APP_KEY), 10) || 0; } catch (e) { /* stockage indisponible */ }
+    var snooze = function (days) {
+      appBanner.hidden = true;
+      try { window.localStorage.setItem(APP_KEY, String(Date.now() + days * 86400000)); } catch (e) { /* stockage indisponible */ }
+    };
+    if (Date.now() >= hideUntil) {
+      appBanner.hidden = false;
+    }
+    appBanner.querySelector('[data-app-banner-close]').addEventListener('click', function () { snooze(30); });
+    appBanner.querySelector('[data-app-banner-cta]').addEventListener('click', function () { snooze(7); });
+  }
+
+  // -----------------------------------------------------------
   // Menu mobile simple
   // -----------------------------------------------------------
   var toggle = document.querySelector('[data-nav-toggle]');
