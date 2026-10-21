@@ -3,6 +3,17 @@ $social = APP_CONFIG['social'] ?? [];
 $waNumber = $social['whatsapp_number'] ?? '';
 $fbUrl = $social['facebook_url'] ?? '';
 ?>
+<?php if (empty($hideAppBanner) && empty($noFooter) && MobileApp::shouldSuggest()): ?>
+<div class="app-banner" id="app-banner" hidden>
+  <img src="<?= Router::url('assets/app/icon-192.png') ?>" alt="" width="44" height="44">
+  <div class="app-banner-text">
+    <strong>IgoTech IA sur ton téléphone</strong>
+    <span>Installe l'application Android, avec le même compte.</span>
+  </div>
+  <a class="btn btn-primary btn-sm" href="<?= Router::url('application') ?>" data-app-banner-cta>Installer</a>
+  <button type="button" class="app-banner-close" data-app-banner-close aria-label="Ne plus proposer l'application">×</button>
+</div>
+<?php endif; ?>
 <?php if (!empty($waNumber)): ?>
 <a class="whatsapp-float" target="_blank" rel="noopener"
    href="https://wa.me/<?= View::e($waNumber) ?>?text=<?= urlencode('Bonjour, j\'ai une question sur IgoTech IA.') ?>"
@@ -11,6 +22,9 @@ $fbUrl = $social['facebook_url'] ?? '';
 <?php if (!isset($noFooter)): ?>
 <footer class="site-footer">
   <p>IgoTech IA — plateforme de mentorat par IA pour les carrières informatiques.</p>
+  <?php if (MobileApp::available() && !MobileApp::isInApp()): ?>
+  <p><a href="<?= Router::url('application') ?>">📱 Application Android</a></p>
+  <?php endif; ?>
   <?php if (!empty($waNumber) || !empty($fbUrl)): ?>
   <p class="social-icons">
     <?php if (!empty($waNumber)): ?>

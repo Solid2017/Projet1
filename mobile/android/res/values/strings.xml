@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">IgoTech IA</string>
+    <!-- Adresse de la plateforme : l'application affiche ce site, avec les mêmes comptes et la même base de données. -->
+    <string name="app_url">https://ia.igotech.tech/</string>
+    <string name="offline_title">Pas de connexion</string>
+    <string name="offline_text">Vérifie ta connexion Internet (données mobiles ou Wi-Fi), puis réessaie.</string>
+    <string name="retry">Réessayer</string>
+    <string name="no_app">Aucune application ne permet d\'ouvrir ce lien.</string>
+</resources>
